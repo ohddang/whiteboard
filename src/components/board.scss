@@ -1,0 +1,15 @@
+.test_text {
+  position: absolute;
+  color: skyblue;
+
+  &.div {
+    color: gray;
+    font-size: 20px;
+    text-align: center;
+  }
+}
+
+#id {
+  width: 100%;
+  height: 100%;
+}
