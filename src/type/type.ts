@@ -1,7 +1,11 @@
 export type Site = [number, number];
 
 export type DrawElement = {
-  start: Site;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+
   dataUrl: string;
 };
 

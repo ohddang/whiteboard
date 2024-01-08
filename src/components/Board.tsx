@@ -27,7 +27,6 @@ const Board = (): JSX.Element => {
 
   const onMouseMove = (e: MouseEvent) => {
     e.preventDefault();
-    console.log(isDrag);
     if (isDrag) {
       position.push([e.pageX, e.pageY]);
       setPosition(position);
@@ -43,7 +42,7 @@ const Board = (): JSX.Element => {
     setIsDrag(false);
 
     makeDrawElements();
-    position.splice(0, position.length);
+    position.splice(0, position.length); // position 초기화
     setPosition(position);
 
     const ctx = mainCanvas.current?.getContext("2d");
@@ -85,17 +84,22 @@ const Board = (): JSX.Element => {
   };
 
   const makeDrawElements = (): void => {
-    const newElement: DrawElement = { start: [0, 0], dataUrl: "" };
+    const newElement = getDrawElement();
 
-    if (mainCanvas.current) {
-      newElement.dataUrl = mainCanvas.current.toDataURL("image/png");
-    }
+    console.log(
+      newElement.top +
+        " " +
+        newElement.left +
+        " " +
+        newElement.width +
+        " " +
+        newElement.height
+    );
     drawElements.push(newElement);
     setDrawElements(drawElements);
   };
 
   const createDrawElement = () => {
-    console.log(drawElements.length);
     return drawElements.map((element) => <DrawElementCanvas el={element} />);
   };
 
@@ -112,6 +116,31 @@ const Board = (): JSX.Element => {
       window.removeEventListener("load", onLoad);
     };
   }, []);
+
+  const getDrawElement = (): DrawElement => {
+    let max_x = Number.MIN_SAFE_INTEGER;
+    let min_x = Number.MAX_SAFE_INTEGER;
+    let max_y = Number.MIN_SAFE_INTEGER;
+    let min_y = Number.MAX_SAFE_INTEGER;
+
+    position.forEach((pos) => {
+      if (pos[0] > max_x) max_x = pos[0];
+      if (pos[0] < min_x) min_x = pos[0];
+      if (pos[1] > max_y) max_y = pos[1];
+      if (pos[1] < min_y) min_y = pos[1];
+    });
+
+    const newElement: DrawElement = {
+      dataUrl: mainCanvas.current
+        ? mainCanvas.current.toDataURL("image/png")
+        : "",
+      left: min_x,
+      top: min_y,
+      width: max_x - min_x,
+      height: max_y - min_y,
+    };
+    return newElement;
+  };
 
   useEffect(() => {
     drawElement();
