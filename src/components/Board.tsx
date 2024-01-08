@@ -3,56 +3,63 @@ import { useState, useEffect, useRef } from "react";
 // 현재 active 객체 관리.. mouse up될때 하위 component로 canvas를 생성해서 그려줌
 //
 
-type Pair = [number, number];
+type Site = [number, number];
 
 const Board = (): JSX.Element => {
-  const [position, setPosition] = useState(Array<Pair>);
+  const [position, setPosition] = useState<Array<Site>>([]);
+  const [isDrag, setIsDrag] = useState<boolean>(false);
   const mainCanvas = useRef<HTMLCanvasElement>(null);
-  const [x, setX] = useState(0);
-  console.log("시작 " + position.length);
+  const ctx = mainCanvas.current?.getContext("2d");
 
-  const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
+  const [currentSite, setCurrentSite] = useState<Site>([0, 0]);
 
-  function onMouseDown(e: MouseEvent) {
-    const prevPosition = [...position];
+  const onMouseDown = (e: MouseEvent) => {
+    position.push([e.pageX, e.pageY]);
+    position.push([e.pageX, e.pageY]);
+    setPosition(position);
 
-    prevPosition.push([e.pageX, e.pageY]);
-    setPosition(prevPosition);
-    setX(e.pageX);
-  }
+    setIsDrag(true);
+  };
 
-  function onMouseMove(e: MouseEvent) {
-    const prevPosition = [...position];
+  const onMouseMove = (e: MouseEvent) => {
+    e.preventDefault();
+    console.log(isDrag);
+    if (isDrag) {
+      position.push([e.pageX, e.pageY]);
+      setPosition(position);
+      setCurrentSite([e.pageX, e.pageY]);
+    }
+  };
 
-    prevPosition.push([e.pageX, e.pageY]);
-    setPosition(prevPosition);
-    setX(e.pageX);
-  }
+  const onMouseUp = (e: MouseEvent) => {
+    // TODO : 현재 path 정보로 child canvas 생성
+    position.push([e.pageX, e.pageY]);
+    setPosition(position);
 
-  function onMouseUp(e: MouseEvent) {
-    const prevPosition = [...position];
+    setIsDrag(false);
+  };
 
-    prevPosition.push([e.pageX, e.pageY]);
-    setPosition(prevPosition);
-    setX(e.pageX);
-  }
-
-  function onResize<T>(e: T) {
+  const onResize = (e: UIEvent) => {
     const ctx = mainCanvas.current?.getContext("2d");
     if (ctx) {
       ctx.canvas.width = window.innerWidth;
       ctx.canvas.height = window.innerHeight;
-      setContext(ctx);
     }
-  }
+  };
+
+  const onLoad = (e: Event) => {
+    const ctx = mainCanvas.current?.getContext("2d");
+    if (ctx) {
+      ctx.canvas.width = window.innerWidth;
+      ctx.canvas.height = window.innerHeight;
+    }
+  };
 
   const drawElement = (): void => {
-    const ctx = context;
-
-    if (position.length === 0) return;
+    if (position.length <= 1) return;
 
     if (ctx) {
-      ctx.strokeStyle = "#ff0";
+      ctx.strokeStyle = "#cc5";
       ctx.lineWidth = 5;
 
       ctx.beginPath();
@@ -61,25 +68,33 @@ const Board = (): JSX.Element => {
       position.forEach((pos) => {
         ctx.lineTo(pos[0], pos[1]);
       });
-      ctx.stroke();
 
-      setContext(ctx);
-      console.log("draw " + position.length);
+      ctx.stroke();
     }
   };
 
   useEffect(() => {
     window.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", onResize);
-    window.addEventListener("load", onResize);
-  }, [position]);
+    window.addEventListener("load", onLoad);
+
+    return () => {
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("load", onLoad);
+    };
+  }, []);
 
   useEffect(() => {
     drawElement();
     window.addEventListener("mousemove", onMouseMove);
-  }, [position]);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+    };
+  }, [currentSite, isDrag]);
 
   return (
     <>
