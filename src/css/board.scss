@@ -9,7 +9,18 @@
   }
 }
 
-#id {
+#main {
   width: 100%;
   height: 100%;
+}
+
+.picture_group {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  &.div {
+    position: relative;
+    width: max-content;
+  }
 }

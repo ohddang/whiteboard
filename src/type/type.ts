@@ -1,13 +1,13 @@
 export type Site = [number, number];
 
-export type DrawElement = {
+export interface DrawElement {
   top: number;
   left: number;
   width: number;
   height: number;
 
-  dataUrl: string;
-};
+  dataUrl?: ImageData;
+}
 
 export interface LineElement extends DrawElement {}
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { DrawElement } from "../type/type";
+import "../css/picture.scss";
 
 const DrawElementCanvas = ({ el }: { el: DrawElement }): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -8,16 +9,18 @@ const DrawElementCanvas = ({ el }: { el: DrawElement }): JSX.Element => {
   if (canvasRef.current) {
     const ctx = canvasRef.current.getContext("2d");
     const img = new Image();
-    img.src = el.dataUrl;
-    canvasRef.current.width = el.width + el.left;
-    canvasRef.current.height = el.height + el.top;
+    img.width = el.width;
+    img.height = el.height;
+
+    canvasRef.current.width = el.width;
+    canvasRef.current.height = el.height;
     canvasRef.current.style.backgroundColor = color;
 
+    console.log(el.dataUrl);
     // 이미지를 그대로 Context로 옮긴느 법..
-    if (ctx) {
-      ctx.drawImage(img, 0, 0);
-
-      // canvasRef.current.style.transform = `translate(${el.left}px, ${el.top}px)`;
+    if (ctx && el.dataUrl) {
+      ctx.putImageData(el.dataUrl, 0, 0);
+      canvasRef.current.style.transform = `translate(${el.left}px, ${el.top}px)`;
     }
   }
 
@@ -35,7 +38,7 @@ const DrawElementCanvas = ({ el }: { el: DrawElement }): JSX.Element => {
 
   return (
     <>
-      <canvas ref={canvasRef}></canvas>
+      <canvas className="picture" ref={canvasRef}></canvas>
     </>
   );
 };

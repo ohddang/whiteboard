@@ -1,3 +1,82 @@
+.test_text {
+  position: absolute;
+  color: skyblue;
+}
+.test_text.div {
+  color: gray;
+  font-size: 20px;
+  text-align: center;
+}
 
+#main {
+  width: 100%;
+  height: 100%;
+}
+
+.picture_group {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.picture_group.div {
+  position: relative;
+  width: max-content;
+}
+
+.tool_box {
+  position: fixed;
+  top: 20px;
+  left: 120px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  list-style: none;
+}
+.tool_box > li {
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+  border-radius: 10px;
+}
+.tool_box > li > button {
+  width: 100px;
+  height: 50px;
+  background: #5080f0;
+  color: white;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+}
+
+.tool_box_detail {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  list-style: none;
+  gap: 10px;
+}
+.tool_box_detail > li {
+  background-color: rgba(0, 0, 0, 0.25);
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+  border-radius: 10px;
+}
+.tool_box_detail > li > button {
+  width: 100px;
+  height: 50px;
+  background: #5080f0;
+  color: white;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+}
 
 /*# sourceMappingURL=style.css.map */
