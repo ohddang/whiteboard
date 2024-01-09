@@ -16,10 +16,10 @@ const DrawElementCanvas = ({ el }: { el: DrawElement }): JSX.Element => {
     canvasRef.current.height = el.height;
     canvasRef.current.style.backgroundColor = color;
 
-    console.log(el.dataUrl);
+    console.log(el.imageData);
     // 이미지를 그대로 Context로 옮긴느 법..
-    if (ctx && el.dataUrl) {
-      ctx.putImageData(el.dataUrl, 0, 0);
+    if (ctx && el.imageData) {
+      ctx.putImageData(el.imageData, 0, 0);
       canvasRef.current.style.transform = `translate(${el.left}px, ${el.top}px)`;
     }
   }

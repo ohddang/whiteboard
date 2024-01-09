@@ -6,7 +6,7 @@ export interface DrawElement {
   width: number;
   height: number;
 
-  dataUrl?: ImageData;
+  imageData?: ImageData;
 }
 
 export interface LineElement extends DrawElement {}

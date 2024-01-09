@@ -8,7 +8,7 @@ import "../css/picture.scss";
 //
 
 const Board = (): JSX.Element => {
-  const [position, setPosition] = useState<Array<Site>>([]);
+  const [path, setPath] = useState<Array<Site>>([]);
   const [isDrag, setIsDrag] = useState<boolean>(false);
   const [drawElements, setDrawElements] = useState<Array<DrawElement>>([]);
 
@@ -17,9 +17,9 @@ const Board = (): JSX.Element => {
   const [currentSite, setCurrentSite] = useState<Site>([0, 0]);
 
   const onMouseDown = (e: MouseEvent) => {
-    position.push([e.pageX, e.pageY]);
-    position.push([e.pageX, e.pageY]);
-    setPosition(position);
+    path.push([e.pageX, e.pageY]);
+    path.push([e.pageX, e.pageY]);
+    setPath(path);
 
     setIsDrag(true);
   };
@@ -27,22 +27,22 @@ const Board = (): JSX.Element => {
   const onMouseMove = (e: MouseEvent) => {
     e.preventDefault();
     if (isDrag) {
-      position.push([e.pageX, e.pageY]);
-      setPosition(position);
+      path.push([e.pageX, e.pageY]);
+      setPath(path);
       setCurrentSite([e.pageX, e.pageY]);
     }
   };
 
   const onMouseUp = (e: MouseEvent) => {
     // TODO : 현재 path 정보로 child canvas 생성
-    position.push([e.pageX, e.pageY]);
+    path.push([e.pageX, e.pageY]);
 
     setIsDrag(false);
 
     const ctx = mainCanvas.current?.getContext("2d");
     makeDrawElements();
-    position.splice(0, position.length); // position 초기화
-    setPosition(position);
+    path.splice(0, path.length); // position 초기화
+    setPath(path);
 
     if (ctx) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   };
@@ -66,16 +66,16 @@ const Board = (): JSX.Element => {
   const drawElement = (): void => {
     const ctx = mainCanvas.current?.getContext("2d");
 
-    if (position.length <= 1) return;
+    if (path.length <= 1) return;
 
     if (ctx) {
       ctx.strokeStyle = "#000";
       ctx.lineWidth = 5;
 
       ctx.beginPath();
-      ctx.moveTo(position[0][0], position[0][1]);
+      ctx.moveTo(path[0][0], path[0][1]);
 
-      position.forEach((pos) => {
+      path.forEach((pos) => {
         ctx.lineTo(pos[0], pos[1]);
       });
 
@@ -105,6 +105,33 @@ const Board = (): JSX.Element => {
     return drawElements.map((element) => <DrawElementCanvas el={element} />);
   };
 
+  const getDrawElement = (): DrawElement => {
+    const ctx = mainCanvas.current?.getContext("2d");
+    if (!ctx) return { left: 0, top: 0, width: 0, height: 0 };
+
+    let max_x = Number.MIN_SAFE_INTEGER;
+    let min_x = Number.MAX_SAFE_INTEGER;
+    let max_y = Number.MIN_SAFE_INTEGER;
+    let min_y = Number.MAX_SAFE_INTEGER;
+
+    path.forEach((pos) => {
+      if (pos[0] > max_x) max_x = pos[0];
+      if (pos[0] < min_x) min_x = pos[0];
+      if (pos[1] > max_y) max_y = pos[1];
+      if (pos[1] < min_y) min_y = pos[1];
+    });
+
+    const newElement: DrawElement = {
+      left: min_x,
+      top: min_y,
+      width: max_x - min_x,
+      height: max_y - min_y,
+      imageData: ctx.getImageData(min_x, min_y, max_x - min_x, max_y - min_y),
+    };
+
+    return newElement;
+  };
+
   useEffect(() => {
     window.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mouseup", onMouseUp);
@@ -118,40 +145,6 @@ const Board = (): JSX.Element => {
       window.removeEventListener("load", onLoad);
     };
   }, []);
-
-  const getDrawElement = (): DrawElement => {
-    const ctx = mainCanvas.current?.getContext("2d");
-    if (!ctx) return { left: 0, top: 0, width: 0, height: 0 };
-
-    let max_x = Number.MIN_SAFE_INTEGER;
-    let min_x = Number.MAX_SAFE_INTEGER;
-    let max_y = Number.MIN_SAFE_INTEGER;
-    let min_y = Number.MAX_SAFE_INTEGER;
-
-    position.forEach((pos) => {
-      if (pos[0] > max_x) max_x = pos[0];
-      if (pos[0] < min_x) min_x = pos[0];
-      if (pos[1] > max_y) max_y = pos[1];
-      if (pos[1] < min_y) min_y = pos[1];
-    });
-
-    // const newPosition = position.map((pos) => {
-    //   pos[0] -= min_x;
-    //   pos[1] -= min_y;
-    //   return pos;
-    // })
-
-    const newElement: DrawElement = {
-      left: min_x,
-      top: min_y,
-      width: max_x - min_x,
-      height: max_y - min_y,
-      dataUrl: ctx.getImageData(min_x, min_y, max_x - min_x, max_y - min_y),
-    };
-
-    console.log(mainCanvas.current);
-    return newElement;
-  };
 
   useEffect(() => {
     drawElement();
