@@ -6,7 +6,10 @@ export interface DrawElement {
   width: number;
   height: number;
 
-  imageData?: ImageData;
+  imageData: ImageData;
+  pickingColor: { r: number; g: number; b: number; a: number };
+  isSelect: boolean;
+  pickImage: HTMLImageElement;
 }
 
 export interface LineElement extends DrawElement {}

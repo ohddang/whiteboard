@@ -1,26 +1,19 @@
-.test_text {
-  position: absolute;
-  color: skyblue;
-
-  &.div {
-    color: gray;
-    font-size: 20px;
-    text-align: center;
-  }
+.board {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
 }
 
-#main {
+.canvas_container {
   width: 100%;
   height: 100%;
-}
+  position: relative;
 
-.picture_group {
-  position: absolute;
-  top: 0;
-  left: 0;
-
-  &.div {
-    position: relative;
-    width: max-content;
+  & > canvas {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
   }
 }
