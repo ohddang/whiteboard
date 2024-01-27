@@ -20,7 +20,7 @@ const DrawElementCanvas = ({ el }: { el: DrawElement }): JSX.Element => {
         canvasRef.current.style.transform = `translate(${el.left}px, ${el.top}px)`;
       }
       if (el.isSelect) {
-        canvasRef.current.style.border = "1px solid red";
+        canvasRef.current.style.border = "5px solid red";
       } else {
         canvasRef.current.style.border = "none";
       }

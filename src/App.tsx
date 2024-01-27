@@ -1,5 +1,3 @@
-import React from "react";
-
 import ToolBox from "./ui/ToolBox";
 import ToolBoxDetail from "./ui/ToolBoxDetail";
 import Board from "./components/Board";
