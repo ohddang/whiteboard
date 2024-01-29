@@ -1,14 +1,30 @@
 export type Site = [number, number];
 
-export interface DrawElement {
+export interface Color {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+export interface Rect {
   top: number;
   left: number;
   width: number;
   height: number;
+}
 
-  imageData: ImageData;
-  pickingColor: { r: number; g: number; b: number; a: number };
+export interface DrawElement {
+  rect: Rect;
+
   isSelect: boolean;
+  pickingColor: { r: number; g: number; b: number; a: number };
+  imageData: ImageData;
+}
+
+export interface PickingElement {
+  rect: Rect;
+
   pickImage: HTMLImageElement;
 }
 

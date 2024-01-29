@@ -1,4 +1,8 @@
-@import "picture.scss";
 @import "board.scss";
 @import "toolBox.scss";
+@import "drawElement.scss";
 @import "toolBoxDetail.scss";
+
+body {
+  margin: 0;
+}

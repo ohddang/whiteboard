@@ -1,35 +1,26 @@
 import { useState, useEffect, useRef } from "react";
-import { Site, DrawElement } from "../type/type";
-import DrawElementCanvas from "./Picture";
-import "../css/board.scss";
+import { Site, Rect, DrawElement, PickingElement, Color } from "../type/type";
+import DrawElementCanvas from "./DrawElementCanvas";
 
-const initDrawElement: DrawElement = {
-  left: 0,
-  top: 0,
-  width: 0,
-  height: 0,
-  imageData: new ImageData(1, 1),
-  pickingColor: { r: 0, g: 0, b: 0, a: 0 },
-  isSelect: false,
-  pickImage: new Image(),
-};
+const Board: React.FC = () => {
+  const mainCanvas = useRef<HTMLCanvasElement>(null);
+  const pickingCanvas = useRef<HTMLCanvasElement>(null);
+  const [mainContext, setMainContext] = useState<CanvasRenderingContext2D>();
+  const [pickingContext, setPickingContext] =
+    useState<CanvasRenderingContext2D>();
 
-const Board = (): JSX.Element => {
   const [path, setPath] = useState<Array<Site>>([]);
   const [isDrag, setIsDrag] = useState<boolean>(false);
   const [drawElements, setDrawElements] = useState<Array<DrawElement>>([]);
-  const [pickingElements, setPickingElements] = useState<Array<DrawElement>>(
+  const [pickingElements, setPickingElements] = useState<Array<PickingElement>>(
     []
   );
-  const [currentPickColor, setCurrentPickColor] = useState<any>({
+  const [currentPickColor, setCurrentPickColor] = useState<Color>({
     r: 0,
     g: 0,
     b: 0,
     a: 0,
   }); // fix it type
-
-  const mainCanvas = useRef<HTMLCanvasElement>(null);
-  const pickingCanvas = useRef<HTMLCanvasElement>(null);
 
   const [currentSite, setCurrentSite] = useState<Site>([0, 0]);
 
@@ -44,11 +35,9 @@ const Board = (): JSX.Element => {
     const r = Math.floor(Math.random() * 255);
     const g = Math.floor(Math.random() * 255);
     const b = Math.floor(Math.random() * 255);
-    const a = 255;
-    const randomColor = [r, g, b, a];
-    const newPickColor = new Array<number>();
+    const a = 1;
 
-    if (currentPickColor != undefined) {
+    if (currentPickColor !== undefined) {
       currentPickColor.r = r;
       currentPickColor.g = g;
       currentPickColor.b = b;
@@ -58,11 +47,10 @@ const Board = (): JSX.Element => {
     setCurrentPickColor(currentPickColor);
 
     // color picking
-    pickingColor(e.pageX, e.pageY);
+    selectElement(e.pageX, e.pageY);
   };
 
   const onMouseMove = (e: MouseEvent) => {
-    e.preventDefault();
     if (isDrag) {
       path.push([e.pageX, e.pageY]);
       setPath(path);
@@ -71,17 +59,20 @@ const Board = (): JSX.Element => {
   };
 
   const onMouseUp = (e: MouseEvent) => {
-    path.push([e.pageX, e.pageY]);
-
     setIsDrag(false);
-
-    const ctx = mainCanvas.current?.getContext("2d");
-    makeDrawElements();
+    updateDrawElements();
+    updatePickingElements();
 
     path.splice(0, path.length);
     setPath(path);
 
-    if (ctx) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (mainContext)
+      mainContext.clearRect(
+        0,
+        0,
+        mainContext.canvas.width,
+        mainContext.canvas.height
+      );
   };
 
   const onResize = (e: UIEvent) => {
@@ -111,75 +102,54 @@ const Board = (): JSX.Element => {
   };
 
   const drawElement = (): void => {
-    const ctx = mainCanvas.current?.getContext("2d");
-
     if (path.length <= 1) return;
 
-    if (ctx) {
-      ctx.strokeStyle = "#ca5";
-      ctx.lineWidth = 5;
+    if (mainContext) {
+      mainContext.strokeStyle = "#ca5";
+      mainContext.lineWidth = 5;
 
-      ctx.beginPath();
-      ctx.moveTo(path[0][0], path[0][1]);
+      mainContext.beginPath();
+      mainContext.moveTo(path[0][0], path[0][1]);
 
       path.forEach((pos) => {
-        ctx.lineTo(pos[0], pos[1]);
+        mainContext.lineTo(pos[0], pos[1]);
       });
-      ctx.stroke();
+      mainContext.stroke();
     }
   };
 
   const drawPickingElement = (): void => {
-    const ctx = pickingCanvas.current?.getContext("2d");
-
     if (path.length <= 1) return;
 
-    if (ctx) {
-      ctx.strokeStyle = `rgba(${currentPickColor?.r}, ${currentPickColor?.g}, ${currentPickColor?.b}, ${currentPickColor?.a})`;
-      ctx.lineWidth = 20;
+    if (pickingContext) {
+      pickingContext.strokeStyle = `rgba(${currentPickColor?.r}, ${currentPickColor?.g}, ${currentPickColor?.b}, ${currentPickColor?.a})`;
+      pickingContext.lineWidth = 15;
 
-      ctx.beginPath();
-      ctx.moveTo(path[0][0], path[0][1]);
+      pickingContext.beginPath();
+      pickingContext.moveTo(path[0][0], path[0][1]);
 
       path.forEach((pos) => {
-        ctx.lineTo(pos[0], pos[1]);
+        pickingContext.lineTo(pos[0], pos[1]);
       });
-      ctx.stroke();
+      pickingContext.stroke();
     }
   };
 
-  const makeDrawElements = (): void => {
-    // create child canvas element
+  const updateDrawElements = (): void => {
     const newElement = getDrawElement();
-    drawElements.push(newElement);
-    setDrawElements(drawElements);
+    if (newElement) {
+      drawElements.push(newElement);
+      setDrawElements(drawElements);
+    }
+  };
 
-    // create picking canvas element
-    const newPickElement = getDrawElement();
-
-    const pickImage = new Image();
-    pickImage.width = newPickElement.width;
-    pickImage.height = newPickElement.height;
-    pickImage.src = pickingCanvas.current?.toDataURL()
-      ? pickingCanvas.current?.toDataURL()
-      : "";
-
-    newPickElement.pickImage = pickImage;
-
+  const updatePickingElements = (): void => {
+    const newPickElement = getPickingElement();
     pickingElements.push(newPickElement);
     setPickingElements(pickingElements);
   };
 
-  const createDrawElement = () => {
-    drawPickingCanvas();
-    return drawElements.map((element) => <DrawElementCanvas el={element} />);
-  };
-
-  const getDrawElement = (): DrawElement => {
-    const ctx = mainCanvas.current?.getContext("2d");
-    if (!ctx) {
-      return initDrawElement;
-    }
+  const getRect = (): Rect => {
     let max_x = Number.MIN_SAFE_INTEGER;
     let min_x = Number.MAX_SAFE_INTEGER;
     let max_y = Number.MIN_SAFE_INTEGER;
@@ -198,30 +168,56 @@ const Board = (): JSX.Element => {
     max_x += 5;
     max_y += 5;
 
-    const newElement: DrawElement = {
+    return {
       left: min_x,
       top: min_y,
       width: max_x - min_x,
       height: max_y - min_y,
+    };
+  };
+
+  const getDrawElement = (): DrawElement | undefined => {
+    const ctx = mainCanvas.current?.getContext("2d");
+    if (!ctx) {
+      return undefined;
+    }
+
+    const rect = getRect();
+    const newElement: DrawElement = {
+      rect: rect,
       imageData: ctx.getImageData(
-        min_x,
-        min_y,
-        Math.max(1, max_x - min_x),
-        Math.max(1, max_y - min_y)
+        rect.left,
+        rect.top,
+        Math.max(1, rect.width),
+        Math.max(1, rect.height)
       ),
       pickingColor: {
-        r: currentPickColor?.r ? currentPickColor?.r : 0,
-        g: currentPickColor?.g ? currentPickColor?.g : 0,
-        b: currentPickColor?.b ? currentPickColor?.b : 0,
-        a: currentPickColor?.a ? currentPickColor?.a : 0,
+        r: currentPickColor.r,
+        g: currentPickColor.g,
+        b: currentPickColor.b,
+        a: currentPickColor.a,
       },
       isSelect: false,
-      pickImage: new Image(),
     };
     return newElement;
   };
 
-  const pickingColor = (x: number, y: number) => {
+  const getPickingElement = (): PickingElement => {
+    const newPickingElement: PickingElement = {
+      rect: getRect(),
+      pickImage: new Image(),
+    };
+
+    newPickingElement.pickImage.width = newPickingElement.rect.width;
+    newPickingElement.pickImage.height = newPickingElement.rect.height;
+    newPickingElement.pickImage.src = pickingCanvas.current?.toDataURL()
+      ? pickingCanvas.current?.toDataURL()
+      : "";
+
+    return newPickingElement;
+  };
+
+  const selectElement = (x: number, y: number) => {
     const ctx = pickingCanvas.current?.getContext("2d");
     if (ctx) {
       const pickColor = ctx.getImageData(x, y, 1, 1).data;
@@ -240,14 +236,19 @@ const Board = (): JSX.Element => {
     setDrawElements(drawElements);
   };
 
-  const drawPickingCanvas = () => {
-    const ctx = pickingCanvas.current?.getContext("2d");
+  const updatePickingCanvas = () => {
+    if (pickingContext) {
+      pickingContext.clearRect(
+        0,
+        0,
+        pickingContext.canvas.width,
+        pickingContext.canvas.height
+      );
 
-    pickingElements.forEach((element) => {
-      if (ctx) {
-        ctx.drawImage(element.pickImage, 0, 0);
-      }
-    });
+      pickingElements.forEach((element) => {
+        pickingContext.drawImage(element.pickImage, 0, 0);
+      });
+    }
   };
 
   useEffect(() => {
@@ -274,10 +275,21 @@ const Board = (): JSX.Element => {
     };
   }, [currentSite, isDrag]);
 
+  useEffect(() => {
+    updatePickingCanvas();
+  }, [pickingElements.length]);
+
+  useEffect(() => {
+    setMainContext(mainCanvas.current?.getContext("2d") || undefined);
+    setPickingContext(pickingCanvas.current?.getContext("2d") || undefined);
+  }, [mainCanvas, pickingCanvas]);
+
   return (
     <>
       <div className="board">
-        {createDrawElement()}
+        {drawElements.map((element) => (
+          <DrawElementCanvas el={element} />
+        ))}
         <div className="canvas_container">
           <canvas className="main_canvas" ref={mainCanvas}></canvas>
           <canvas className="picking_canvas" ref={pickingCanvas}></canvas>
