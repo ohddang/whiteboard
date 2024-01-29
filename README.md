@@ -6,8 +6,8 @@
 ## 🔍 프로젝트 정보
 * Typescript, css라이브러리, canvas활용, 최적화 학습을 목적으로 진행  
 * 개발기간
-  * 2024.1.6 ~ 2024.1.10(1주) Canvas picking 구현
-  * 2024.1.27 ~               CRA -> Vite Migration. git actions을 이용해 github pages로 배포  
+  * 2024.1.6 ~ 2024.1.10(1주) / Canvas picking 구현
+  * 2024.1.27 ~ 진행중 / CRA -> Vite Migration. git actions을 이용해 github pages로 배포  
 <br/>
 
 ## 📖 주요기능
