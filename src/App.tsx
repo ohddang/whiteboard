@@ -5,9 +5,9 @@ import Board from "./components/Board";
 function App() {
   return (
     <>
-      <ToolBox />
-      <ToolBoxDetail />
       <Board />
+      <ToolBox />
+      {/* <ToolBoxDetail /> */}
     </>
   );
 }

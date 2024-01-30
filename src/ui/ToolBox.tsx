@@ -1,39 +1,38 @@
 import "../css/toolBox.scss";
+import arrow from "/assets/arrow.svg";
+import lock from "/assets/lock.svg";
+import unlock from "/assets/unlock.svg";
+import move from "/assets/move.svg";
+import rect from "/assets/rect.svg";
+import select from "/assets/select.svg";
+import text from "/assets/text.svg";
+import image from "/assets/image.svg";
 
 const ToolBox = () => {
   return (
     <>
-      <div>
+      <div className="tool_box_container">
         <ul className="tool_box">
           <li>
-            <button>그립</button>
+            <img src={lock} />
           </li>
           <li>
-            <button>마우스</button>
+            <img src={move} />
           </li>
           <li>
-            <button>붓</button>
+            <img src={select} />
           </li>
           <li>
-            <button>네모</button>
+            <img src={rect} />
           </li>
           <li>
-            <button>선</button>
+            <img src={arrow} />
           </li>
           <li>
-            <button>텍스트</button>
+            <img src={text} />
           </li>
           <li>
-            <button>7</button>
-          </li>
-          <li>
-            <button>8</button>
-          </li>
-          <li>
-            <button>9</button>
-          </li>
-          <li>
-            <button>10</button>
+            <img src={image} />
           </li>
         </ul>
       </div>

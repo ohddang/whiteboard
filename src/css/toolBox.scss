@@ -1,30 +1,40 @@
-.tool_box {
+.tool_box_container {
   position: fixed;
-  top: 20px;
-  left: 120px;
 
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: row;
-  gap: 20px;
+  justify-content: center;
+  // align-items: center;
+}
+
+.tool_box {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+
+  left: 0;
+  padding: 0;
 
   width: 100%;
-  list-style: none;
+  height: 40px;
 
-  & > li {
-    color: white;
-    font-weight: bold;
-    font-size: 20px;
-    text-align: center;
+  > li {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 1);
     border-radius: 10px;
 
-    & > button {
-      width: 100px;
-      height: 50px;
-      background: #508000;
-      color: white;
-      font-size: 20px;
-      border-radius: 10px;
-      border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    outline: 1px solid rgba(0, 0, 0, 0.25);
+
+    &:hover {
+      background-color: skyblue;
     }
   }
 }
