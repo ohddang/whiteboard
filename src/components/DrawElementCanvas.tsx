@@ -11,7 +11,6 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
 
   useEffect(() => {
     if (canvasRef.current) {
-      console.log("drawElementCanvas", el);
       const ctx = canvasRef.current.getContext("2d");
       const img = new Image();
       img.width = el.rect.width;

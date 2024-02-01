@@ -23,6 +23,7 @@ const Board: React.FC = () => {
   const [pickingElements, setPickingElements] = useState<Array<PickingElement>>(
     []
   );
+  const [isTrigger, setIsTrigger] = useState<boolean>(false);
   const [currentPickColor, setCurrentPickColor] = useState<Color>({
     r: 0,
     g: 0,
@@ -39,8 +40,6 @@ const Board: React.FC = () => {
       getTool() === ToolType.ARROW ||
       getTool() === ToolType.TEXT
     ) {
-      console.log("onMouseDown");
-      path.push([e.pageX, e.pageY]);
       path.push([e.pageX, e.pageY]);
 
       setPath(path);
@@ -63,12 +62,15 @@ const Board: React.FC = () => {
     }
 
     // color picking
-    if (getTool() === ToolType.SELECT) selectElement(e.pageX, e.pageY);
+    if (getTool() === ToolType.SELECT || getTool() === ToolType.MOVE)
+      selectElement(e.pageX, e.pageY);
   };
 
   const onMouseMove = (e: MouseEvent) => {
     if (getTool() === ToolType.RECT || getTool() === ToolType.ARROW) {
       if (isDrag) {
+        if (path.length > 1) path.pop();
+
         path.push([e.pageX, e.pageY]);
         setPath(path);
         setCurrentSite([e.pageX, e.pageY]);
@@ -85,13 +87,14 @@ const Board: React.FC = () => {
       path.splice(0, path.length);
       setPath(path);
 
-      if (mainContext)
+      if (mainContext) {
         mainContext.clearRect(
           0,
           0,
           mainContext.canvas.width,
           mainContext.canvas.height
         );
+      }
     }
   };
 
@@ -122,35 +125,73 @@ const Board: React.FC = () => {
   };
 
   const drawElement = (): void => {
+    mainContext?.clearRect(
+      0,
+      0,
+      mainContext.canvas.width,
+      mainContext.canvas.height
+    );
+
     if (path.length <= 1) return;
 
     if (mainContext) {
       mainContext.strokeStyle = "#ca5";
       mainContext.lineWidth = 5;
-
       mainContext.beginPath();
-      mainContext.moveTo(path[0][0], path[0][1]);
 
-      path.forEach((pos) => {
-        mainContext.lineTo(pos[0], pos[1]);
-      });
+      switch (getTool()) {
+        case ToolType.RECT:
+          mainContext.rect(
+            path[0][0],
+            path[0][1],
+            Math.abs(path[1][0] - path[0][0]),
+            Math.abs(path[1][1] - path[0][1])
+          );
+          break;
+        case ToolType.ARROW:
+          mainContext.moveTo(path[0][0], path[0][1]);
+          path.forEach((pos) => {
+            mainContext.lineTo(pos[0], pos[1]);
+          });
+          break;
+      }
+
       mainContext.stroke();
     }
   };
 
   const drawPickingElement = (): void => {
+    pickingContext?.clearRect(
+      0,
+      0,
+      pickingContext.canvas.width,
+      pickingContext.canvas.height
+    );
+
     if (path.length <= 1) return;
 
     if (pickingContext) {
       pickingContext.strokeStyle = `rgba(${currentPickColor?.r}, ${currentPickColor?.g}, ${currentPickColor?.b}, ${currentPickColor?.a})`;
       pickingContext.lineWidth = 15;
-
       pickingContext.beginPath();
-      pickingContext.moveTo(path[0][0], path[0][1]);
 
-      path.forEach((pos) => {
-        pickingContext.lineTo(pos[0], pos[1]);
-      });
+      switch (getTool()) {
+        case ToolType.RECT:
+          pickingContext.rect(
+            path[0][0],
+            path[0][1],
+            Math.abs(path[1][0] - path[0][0]),
+            Math.abs(path[1][1] - path[0][1])
+          );
+          break;
+        case ToolType.ARROW:
+          pickingContext.moveTo(path[0][0], path[0][1]);
+          path.forEach((pos) => {
+            pickingContext.lineTo(pos[0], pos[1]);
+          });
+          break;
+      }
+
       pickingContext.stroke();
     }
   };
@@ -261,27 +302,23 @@ const Board: React.FC = () => {
 
   const updatePickingCanvas = () => {
     if (pickingContext) {
-      pickingContext.clearRect(
-        0,
-        0,
-        pickingContext.canvas.width,
-        pickingContext.canvas.height
-      );
-
       pickingElements.forEach((element) => {
         pickingContext.drawImage(element.pickImage, 0, 0);
       });
+      requestAnimationFrame(updatePickingCanvas);
     }
   };
 
   useEffect(() => {
-    window.addEventListener("mousedown", onMouseDown);
+    if (pickingCanvas.current)
+      pickingCanvas.current.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", onResize);
     window.addEventListener("load", onLoad);
 
     return () => {
-      window.removeEventListener("mousedown", onMouseDown);
+      if (pickingCanvas.current)
+        pickingCanvas.current.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("load", onLoad);
@@ -307,13 +344,10 @@ const Board: React.FC = () => {
     setPickingContext(pickingCanvas.current?.getContext("2d") || undefined);
   }, [mainCanvas, pickingCanvas]);
 
-  console.log("drawElements", drawElements.length);
-
   return (
     <>
       <div className="board">
         {drawElements.map((element) => {
-          console.log("drawElement", element.isSelect);
           return <DrawElementCanvas el={element} />;
         })}
         <div className="canvas_container">

@@ -32,17 +32,23 @@ const ToolBox = () => {
   const { isFixed, setIsFixed } = useToolFixStore();
   const { tool, setTool } = useSelectedToolStore();
 
-  const onLockToggle = () => {
+  const onLockToggle = (event) => {
+    event.stopPropagation();
     setIsFixed(!isFixed);
   };
 
   const onClickTool = (event: any, type: ToolType) => {
+    event.stopPropagation();
     setTool(type);
   };
 
   const ToolButton = ({ select, type, onClick }: ToolButtonProps) => {
     return (
-      <li className={classNames("tool_button", select)} onClick={onClick}>
+      <li
+        key={type}
+        className={classNames("tool_button", select)}
+        onClick={onClick}
+      >
         <img src={type} alt={type} />
       </li>
     );
@@ -53,9 +59,17 @@ const ToolBox = () => {
       <div className="tool_box_container">
         <ul className="tool_box">
           {isFixed ? (
-            <ToolButton select="select" type={lock} onClick={onLockToggle} />
+            <ToolButton
+              select="select"
+              type={lock}
+              onClick={(event) => onLockToggle(event)}
+            />
           ) : (
-            <ToolButton select="" type={unlock} onClick={onLockToggle} />
+            <ToolButton
+              select=""
+              type={unlock}
+              onClick={(event) => onLockToggle(event)}
+            />
           )}
           {toolList.map((type, index) => {
             return (
