@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { Site, Rect, DrawElement, PickingElement, Color } from "../type/type";
+import {
+  Site,
+  Rect,
+  DrawElement,
+  PickingElement,
+  Color,
+  ToolType,
+} from "../type/common";
 import DrawElementCanvas from "./DrawElementCanvas";
+import { useSelectedToolStore } from "../store/store";
 
 const Board: React.FC = () => {
   const mainCanvas = useRef<HTMLCanvasElement>(null);
@@ -23,56 +31,68 @@ const Board: React.FC = () => {
   }); // fix it type
 
   const [currentSite, setCurrentSite] = useState<Site>([0, 0]);
+  const { tool, setTool, getTool } = useSelectedToolStore();
 
   const onMouseDown = (e: MouseEvent) => {
-    path.push([e.pageX, e.pageY]);
-    path.push([e.pageX, e.pageY]);
+    if (
+      getTool() === ToolType.RECT ||
+      getTool() === ToolType.ARROW ||
+      getTool() === ToolType.TEXT
+    ) {
+      console.log("onMouseDown");
+      path.push([e.pageX, e.pageY]);
+      path.push([e.pageX, e.pageY]);
 
-    setPath(path);
-    setIsDrag(true);
+      setPath(path);
+      setIsDrag(true);
 
-    // set current color picking key
-    const r = Math.floor(Math.random() * 255);
-    const g = Math.floor(Math.random() * 255);
-    const b = Math.floor(Math.random() * 255);
-    const a = 1;
+      // set current color picking key
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      const a = 1;
 
-    if (currentPickColor !== undefined) {
-      currentPickColor.r = r;
-      currentPickColor.g = g;
-      currentPickColor.b = b;
-      currentPickColor.a = a;
+      if (currentPickColor !== undefined) {
+        currentPickColor.r = r;
+        currentPickColor.g = g;
+        currentPickColor.b = b;
+        currentPickColor.a = a;
+      }
+
+      setCurrentPickColor(currentPickColor);
     }
 
-    setCurrentPickColor(currentPickColor);
-
     // color picking
-    selectElement(e.pageX, e.pageY);
+    if (getTool() === ToolType.SELECT) selectElement(e.pageX, e.pageY);
   };
 
   const onMouseMove = (e: MouseEvent) => {
-    if (isDrag) {
-      path.push([e.pageX, e.pageY]);
-      setPath(path);
-      setCurrentSite([e.pageX, e.pageY]);
+    if (getTool() === ToolType.RECT || getTool() === ToolType.ARROW) {
+      if (isDrag) {
+        path.push([e.pageX, e.pageY]);
+        setPath(path);
+        setCurrentSite([e.pageX, e.pageY]);
+      }
     }
   };
 
   const onMouseUp = (e: MouseEvent) => {
-    setIsDrag(false);
-    updateDrawElements();
-    updatePickingElements();
+    if (getTool() === ToolType.RECT || getTool() === ToolType.ARROW) {
+      setIsDrag(false);
+      updateDrawElements();
+      updatePickingElements();
 
-    path.splice(0, path.length);
-    setPath(path);
+      path.splice(0, path.length);
+      setPath(path);
 
-    if (mainContext)
-      mainContext.clearRect(
-        0,
-        0,
-        mainContext.canvas.width,
-        mainContext.canvas.height
-      );
+      if (mainContext)
+        mainContext.clearRect(
+          0,
+          0,
+          mainContext.canvas.width,
+          mainContext.canvas.height
+        );
+    }
   };
 
   const onResize = (e: UIEvent) => {
@@ -198,6 +218,7 @@ const Board: React.FC = () => {
         a: currentPickColor.a,
       },
       isSelect: false,
+      usedTool: tool,
     };
     return newElement;
   };
@@ -221,7 +242,8 @@ const Board: React.FC = () => {
     const ctx = pickingCanvas.current?.getContext("2d");
     if (ctx) {
       const pickColor = ctx.getImageData(x, y, 1, 1).data;
-      drawElements.forEach((element) => {
+
+      const newDrawElements = drawElements.map((element) => {
         if (
           element.pickingColor.r === pickColor[0] &&
           element.pickingColor.g === pickColor[1] &&
@@ -231,9 +253,10 @@ const Board: React.FC = () => {
         } else {
           element.isSelect = false;
         }
+        return element;
       });
+      setDrawElements(newDrawElements);
     }
-    setDrawElements(drawElements);
   };
 
   const updatePickingCanvas = () => {
@@ -284,12 +307,15 @@ const Board: React.FC = () => {
     setPickingContext(pickingCanvas.current?.getContext("2d") || undefined);
   }, [mainCanvas, pickingCanvas]);
 
+  console.log("drawElements", drawElements.length);
+
   return (
     <>
       <div className="board">
-        {drawElements.map((element) => (
-          <DrawElementCanvas el={element} />
-        ))}
+        {drawElements.map((element) => {
+          console.log("drawElement", element.isSelect);
+          return <DrawElementCanvas el={element} />;
+        })}
         <div className="canvas_container">
           <canvas className="main_canvas" ref={mainCanvas}></canvas>
           <canvas className="picking_canvas" ref={pickingCanvas}></canvas>

@@ -1,3 +1,12 @@
+export const enum ToolType {
+  MOVE = 0,
+  SELECT,
+  RECT,
+  ARROW,
+  TEXT,
+  IMAGE,
+}
+
 export type Site = [number, number];
 
 export interface Color {
@@ -20,6 +29,7 @@ export interface DrawElement {
   isSelect: boolean;
   pickingColor: { r: number; g: number; b: number; a: number };
   imageData: ImageData;
+  usedTool: ToolType;
 }
 
 export interface PickingElement {

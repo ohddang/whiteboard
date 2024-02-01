@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { DrawElement } from "../type/type";
+import { useEffect, useRef } from "react";
+import { DrawElement } from "../type/common";
 import "../css/drawElement.scss";
 
 const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
@@ -8,8 +8,10 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
   el: DrawElement;
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
     if (canvasRef.current) {
+      console.log("drawElementCanvas", el);
       const ctx = canvasRef.current.getContext("2d");
       const img = new Image();
       img.width = el.rect.width;

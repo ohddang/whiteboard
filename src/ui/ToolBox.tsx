@@ -7,33 +7,65 @@ import rect from "/assets/rect.svg";
 import select from "/assets/select.svg";
 import text from "/assets/text.svg";
 import image from "/assets/image.svg";
+import classNames from "classnames";
+import { useSelectedToolStore, useToolFixStore } from "../store/store";
+import { ToolType } from "../type/common";
+
+type ToolButtonProps = {
+  select: string;
+  type: string;
+  onClick: (event: any) => void;
+};
+
+const toolList: ToolType[] = [
+  ToolType.MOVE,
+  ToolType.SELECT,
+  ToolType.RECT,
+  ToolType.ARROW,
+  ToolType.TEXT,
+  ToolType.IMAGE,
+];
+
+const toolImageList = [move, select, rect, arrow, text, image];
 
 const ToolBox = () => {
+  const { isFixed, setIsFixed } = useToolFixStore();
+  const { tool, setTool } = useSelectedToolStore();
+
+  const onLockToggle = () => {
+    setIsFixed(!isFixed);
+  };
+
+  const onClickTool = (event: any, type: ToolType) => {
+    setTool(type);
+  };
+
+  const ToolButton = ({ select, type, onClick }: ToolButtonProps) => {
+    return (
+      <li className={classNames("tool_button", select)} onClick={onClick}>
+        <img src={type} alt={type} />
+      </li>
+    );
+  };
+
   return (
     <>
       <div className="tool_box_container">
         <ul className="tool_box">
-          <li>
-            <img src={lock} />
-          </li>
-          <li>
-            <img src={move} />
-          </li>
-          <li>
-            <img src={select} />
-          </li>
-          <li>
-            <img src={rect} />
-          </li>
-          <li>
-            <img src={arrow} />
-          </li>
-          <li>
-            <img src={text} />
-          </li>
-          <li>
-            <img src={image} />
-          </li>
+          {isFixed ? (
+            <ToolButton select="select" type={lock} onClick={onLockToggle} />
+          ) : (
+            <ToolButton select="" type={unlock} onClick={onLockToggle} />
+          )}
+          {toolList.map((type, index) => {
+            return (
+              <ToolButton
+                select={type === tool ? "select" : ""}
+                type={toolImageList[index]}
+                onClick={(event) => onClickTool(event, type)}
+              />
+            );
+          })}
         </ul>
       </div>
     </>
