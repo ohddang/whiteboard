@@ -17,10 +17,12 @@
 <br/>
 
 ## 🔥 개발 중 겪었던 이슈
-* 초기 CSS라이브러리 선택 시 tailwindcss를 사용하려 하였으나 랜덤으로 색상값을 생성하여 key값으로 사용해야해서 SASS로 변경
-* useEffect에서 이벤트핸들러 등록했을때 선이 늘어날 수록 브라우저 속도가 현저히 느려지는 이슈
 * Canvas 동적생성 시 이전 Canvas에 있는 이미지를 새 Canvas로 전달 방법
-* Canvas -> Canvas로 이미지 전달 시 영역이 비어있어도 Canvas의 사각형 영역이 뒤의 이미지를 가리는 현상  
+* 마지막에 그려야할 Picking Element가 제대로 업데이트 되지 않는 현상
+* Canvas -> Canvas로 이미지 전달 시 영역이 비어있어도 Canvas의 사각형 영역이 뒤의 이미지를 가리는 현상
+* CSS라이브러리 선택 시 tailwindcss를 사용하려 하였으나 랜덤으로 색상값을 생성하여 key값으로 사용해야해서 SASS로 변경
+* useEffect에서 이벤트핸들러 등록했을때 선이 늘어날 수록 브라우저 속도가 현저히 느려지는 이슈
+* 화이트보드 영역에서 마우스를 그냥 클릭하면(mousedown event, mouseup event)가 바로 실행되어 객체가 생기는 문제가 발생  
 <br/>
 
 ## ✏ 기술스택
