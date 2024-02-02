@@ -23,7 +23,6 @@ const Board: React.FC = () => {
   const [pickingElements, setPickingElements] = useState<Array<PickingElement>>(
     []
   );
-  const [isTrigger, setIsTrigger] = useState<boolean>(false);
   const [currentPickColor, setCurrentPickColor] = useState<Color>({
     r: 0,
     g: 0,
@@ -69,6 +68,12 @@ const Board: React.FC = () => {
   const onMouseMove = (e: MouseEvent) => {
     if (getTool() === ToolType.RECT || getTool() === ToolType.ARROW) {
       if (isDrag) {
+        if (
+          Math.abs(path[0][0] - e.pageX) < 10 &&
+          Math.abs(path[0][1] - e.pageY) < 10
+        )
+          return;
+
         if (path.length > 1) path.pop();
 
         path.push([e.pageX, e.pageY]);
@@ -206,8 +211,10 @@ const Board: React.FC = () => {
 
   const updatePickingElements = (): void => {
     const newPickElement = getPickingElement();
-    pickingElements.push(newPickElement);
-    setPickingElements(pickingElements);
+    if (newPickElement) {
+      pickingElements.push(newPickElement);
+      setPickingElements(pickingElements);
+    }
   };
 
   const getRect = (): Rect => {
@@ -224,10 +231,10 @@ const Board: React.FC = () => {
     });
 
     // line width 만큼 영역 확장
-    min_x -= 5;
-    min_y -= 5;
-    max_x += 5;
-    max_y += 5;
+    min_x -= 3;
+    min_y -= 3;
+    max_x += 3;
+    max_y += 3;
 
     return {
       left: min_x,
@@ -244,6 +251,8 @@ const Board: React.FC = () => {
     }
 
     const rect = getRect();
+    if (rect.width < 10 && rect.height < 10) return undefined;
+
     const newElement: DrawElement = {
       rect: rect,
       imageData: ctx.getImageData(
@@ -264,11 +273,13 @@ const Board: React.FC = () => {
     return newElement;
   };
 
-  const getPickingElement = (): PickingElement => {
+  const getPickingElement = (): PickingElement | undefined => {
     const newPickingElement: PickingElement = {
       rect: getRect(),
       pickImage: new Image(),
     };
+    if (newPickingElement.rect.width < 10 || newPickingElement.rect.height < 10)
+      return undefined;
 
     newPickingElement.pickImage.width = newPickingElement.rect.width;
     newPickingElement.pickImage.height = newPickingElement.rect.height;

@@ -32,13 +32,11 @@ const ToolBox = () => {
   const { isFixed, setIsFixed } = useToolFixStore();
   const { tool, setTool } = useSelectedToolStore();
 
-  const onLockToggle = (event) => {
-    event.stopPropagation();
+  const onLockToggle = (event: MouseEvent) => {
     setIsFixed(!isFixed);
   };
 
-  const onClickTool = (event: any, type: ToolType) => {
-    event.stopPropagation();
+  const onClickTool = (event: MouseEvent, type: ToolType) => {
     setTool(type);
   };
 
