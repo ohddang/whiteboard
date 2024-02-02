@@ -12,7 +12,7 @@
 
 ## 📖 주요기능
 * 그림 도구를 선택한 뒤 그리기, 편집 등의 동작 수행  
-* 그리기 도구 선택 후 mouseup 이벤트 발생 시 개별 element를 생성
+* 그리기 도구 선택 후 mouseup 이벤트 발생 시 개별 canvas element를 생성
 * 마우스 클릭으로 각각의 element를 picking하는 기능 구현  
 <br/>
 
