@@ -140,18 +140,15 @@ const Board: React.FC = () => {
     if (path.length <= 1) return;
 
     if (mainContext) {
+      const rect = getRect();
+
       mainContext.strokeStyle = "#ca5";
       mainContext.lineWidth = 5;
       mainContext.beginPath();
 
       switch (getTool()) {
         case ToolType.RECT:
-          mainContext.rect(
-            path[0][0],
-            path[0][1],
-            Math.abs(path[1][0] - path[0][0]),
-            Math.abs(path[1][1] - path[0][1])
-          );
+          mainContext.rect(rect.left, rect.top, rect.width, rect.height);
           break;
         case ToolType.ARROW:
           mainContext.moveTo(path[0][0], path[0][1]);
@@ -176,18 +173,15 @@ const Board: React.FC = () => {
     if (path.length <= 1) return;
 
     if (pickingContext) {
+      const rect = getRect();
+
       pickingContext.strokeStyle = `rgba(${currentPickColor?.r}, ${currentPickColor?.g}, ${currentPickColor?.b}, ${currentPickColor?.a})`;
       pickingContext.lineWidth = 15;
       pickingContext.beginPath();
 
       switch (getTool()) {
         case ToolType.RECT:
-          pickingContext.rect(
-            path[0][0],
-            path[0][1],
-            Math.abs(path[1][0] - path[0][0]),
-            Math.abs(path[1][1] - path[0][1])
-          );
+          pickingContext.rect(rect.left, rect.top, rect.width, rect.height);
           break;
         case ToolType.ARROW:
           pickingContext.moveTo(path[0][0], path[0][1]);
@@ -230,12 +224,6 @@ const Board: React.FC = () => {
       if (pos[1] < min_y) min_y = pos[1];
     });
 
-    // line width 만큼 영역 확장
-    min_x -= 3;
-    min_y -= 3;
-    max_x += 3;
-    max_y += 3;
-
     return {
       left: min_x,
       top: min_y,
@@ -251,7 +239,7 @@ const Board: React.FC = () => {
     }
 
     const rect = getRect();
-    if (rect.width < 10 && rect.height < 10) return undefined;
+    if (rect.width < 10 || rect.height < 10) return undefined;
 
     const newElement: DrawElement = {
       rect: rect,
@@ -324,7 +312,7 @@ const Board: React.FC = () => {
     if (pickingCanvas.current)
       pickingCanvas.current.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mouseup", onMouseUp);
-    window.addEventListener("resize", onResize);
+    document.addEventListener("resize", onResize);
     window.addEventListener("load", onLoad);
 
     return () => {
