@@ -23,18 +23,19 @@ export interface Rect {
   height: number;
 }
 
-export interface DrawElement {
+export interface CanvasElement {
   rect: Rect;
+  pickingColor: Color;
+}
 
+export interface DrawElement extends CanvasElement {
   isSelect: boolean;
-  pickingColor: { r: number; g: number; b: number; a: number };
   imageData: ImageData;
   usedTool: ToolType;
 }
 
-export interface PickingElement {
+export interface PickingElement extends CanvasElement {
   rect: Rect;
-
   pickImage: HTMLImageElement;
 }
 

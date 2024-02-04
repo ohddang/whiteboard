@@ -38,10 +38,10 @@ const Board: React.FC = () => {
       case ToolType.RECT:
       case ToolType.ARROW:
       case ToolType.TEXT:
-        path.push([e.clientX, e.clientY]);
+        path.push([e.pageX, e.pageY]);
         setPath(path);
-        setIsDrag(true);
         if (currentPickColor !== undefined) {
+          setIsDrag(true);
           currentPickColor.r = Math.floor(Math.random() * 255);
           currentPickColor.g = Math.floor(Math.random() * 255);
           currentPickColor.b = Math.floor(Math.random() * 255);
@@ -51,7 +51,11 @@ const Board: React.FC = () => {
         break;
       case ToolType.SELECT:
       case ToolType.MOVE:
-        selectElement(e.clientX, e.clientY);
+        setIsDrag(true);
+        path.push([e.pageX, e.pageY]);
+        setPath(path);
+
+        selectElement(e.pageX, e.pageY);
         break;
       default:
         break;
@@ -59,7 +63,9 @@ const Board: React.FC = () => {
   };
 
   const onMouseMove = (e: MouseEvent) => {
-    switch (getTool()) {
+    const tool = getTool();
+    console.log(tool);
+    switch (tool) {
       case ToolType.RECT:
       case ToolType.ARROW:
         if (isDrag) {
@@ -77,10 +83,34 @@ const Board: React.FC = () => {
         }
         break;
       case ToolType.MOVE:
+        if (isDrag) {
+          if (path && path.length > 1) {
+            const prePosition: Site | undefined = path.pop();
+            if (prePosition === undefined) return;
+
+            const moveX = e.pageX - prePosition[0];
+            const moveY = e.pageY - prePosition[1];
+            updateSelectElement(moveX, moveY);
+          }
+          path.push([e.pageX, e.pageY]);
+          setPath(path);
+          setCurrentSite([e.pageX, e.pageY]);
+        }
         break;
       default:
         break;
     }
+  };
+
+  const updateSelectElement = (x: number, y: number) => {
+    const newDrawElements = drawElements.map((element) => {
+      if (element.isSelect) {
+        element.rect.left += x;
+        element.rect.top += y;
+      }
+      return element;
+    });
+    setDrawElements(newDrawElements);
   };
 
   const onMouseUp = (e: MouseEvent) => {
@@ -88,9 +118,6 @@ const Board: React.FC = () => {
       setIsDrag(false);
       addDrawElements(); // fix : drawelement와 pickingelement가 마우스를 빠르게 움직이면 달라짐..
       addPickingElements();
-
-      path.splice(0, path.length);
-      setPath(path);
 
       if (mainContext) {
         mainContext.clearRect(
@@ -101,6 +128,11 @@ const Board: React.FC = () => {
         );
       }
     }
+    if (getTool() === ToolType.MOVE) {
+      setIsDrag(false);
+    }
+    path.splice(0, path.length);
+    setPath(path);
   };
 
   const onResize = (e: any) => {
@@ -126,7 +158,7 @@ const Board: React.FC = () => {
         context.lineWidth = 5;
       } else if (context === pickingContext) {
         context.strokeStyle = `rgba(${currentPickColor?.r}, ${currentPickColor?.g}, ${currentPickColor?.b}, ${currentPickColor?.a})`;
-        context.lineWidth = 15;
+        context.lineWidth = 10;
       }
 
       const rect = getRect();
@@ -219,6 +251,12 @@ const Board: React.FC = () => {
     const newPickingElement: PickingElement = {
       rect: rect,
       pickImage: new Image(),
+      pickingColor: {
+        r: currentPickColor.r,
+        g: currentPickColor.g,
+        b: currentPickColor.b,
+        a: currentPickColor.a,
+      },
     };
 
     newPickingElement.pickImage.width = newPickingElement.rect.width;
@@ -250,7 +288,10 @@ const Board: React.FC = () => {
   const updatePickingCanvas = () => {
     if (pickingContext) {
       pickingElements.forEach((element) => {
+        // pickingContext.translate(element.rect.left, element.rect.top);
         pickingContext.drawImage(element.pickImage, 0, 0);
+
+        // pickingContext.translate(-element.rect.left, -element.rect.top);
       });
       requestAnimationFrame(updatePickingCanvas);
     }
@@ -260,8 +301,8 @@ const Board: React.FC = () => {
     if (pickingCanvas.current)
       pickingCanvas.current.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mouseup", onMouseUp);
-    window.addEventListener("resize", onResize); // fixme : resize시 drawelement 위치가 변함
-    window.addEventListener("load", onResize); // fixme : resize시 drawelement 위치가 변함
+    window.addEventListener("resize", onResize);
+    window.addEventListener("load", onResize);
     return () => {
       if (pickingCanvas.current)
         pickingCanvas.current.removeEventListener("mousedown", onMouseDown);
@@ -292,6 +333,10 @@ const Board: React.FC = () => {
   useEffect(() => {
     setPickingContext(pickingCanvas.current?.getContext("2d") || undefined);
   }, [pickingCanvas]);
+
+  useEffect(() => {
+    setIsDrag(false);
+  }, [tool]);
 
   return (
     <>

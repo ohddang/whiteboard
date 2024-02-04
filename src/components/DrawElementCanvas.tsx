@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { DrawElement } from "../type/common";
-import "../css/drawElement.scss";
+import "./drawElement.scss";
 
 const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
   el,
@@ -29,7 +29,7 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
         canvasRef.current.style.outline = "none";
       }
     }
-  }, [el.isSelect]);
+  }, [el.isSelect, el.rect.left, el.rect.top, el.rect.width, el.rect.height]);
 
   return (
     <>

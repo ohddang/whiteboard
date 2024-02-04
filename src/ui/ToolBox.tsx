@@ -1,4 +1,4 @@
-import "../css/toolBox.scss";
+import "./toolBox.scss";
 import arrow from "/assets/arrow.svg";
 import lock from "/assets/lock.svg";
 import unlock from "/assets/unlock.svg";

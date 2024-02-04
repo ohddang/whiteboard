@@ -1,4 +1,4 @@
-import "../css/toolBoxDetail.scss";
+import "./toolBoxDetail.scss";
 
 const ToolBoxDetail = () => {
   return (

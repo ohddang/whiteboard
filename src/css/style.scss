@@ -1,7 +1,7 @@
-@import "board.scss";
-@import "toolBox.scss";
-@import "drawElement.scss";
-@import "toolBoxDetail.scss";
+@import "/src/components/board.scss";
+@import "/src/components/drawElement.scss";
+@import "/src/ui/toolBox.scss";
+@import "/src/ui/toolBoxDetail.scss";
 
 html {
   height: 100%;
