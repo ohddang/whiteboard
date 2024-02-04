@@ -292,7 +292,7 @@ const Board: React.FC = () => {
     if (context) {
       if (context === mainContext) {
         context.strokeStyle = "#ca5";
-        context.lineWidth = 5;
+        context.lineWidth = 10;
       } else if (context === pickingDrawContext) {
         context.strokeStyle = `rgba(${pickingColorRef.current?.r}, ${pickingColorRef.current?.g}, ${pickingColorRef.current?.b}, ${pickingColorRef.current?.a})`;
         context.lineWidth = 10;
@@ -330,7 +330,20 @@ const Board: React.FC = () => {
           element.translate.x + element.rect.width / 2,
           element.translate.y + element.rect.height / 2
         );
-        pickingContext.rotate(-1 * (Math.PI / 180));
+        pickingContext.rotate(15 * (Math.PI / 180));
+
+        pickingContext.translate(
+          -element.rect.width / 2,
+          -element.rect.height / 2
+        );
+
+        const scale = 1.2;
+        pickingContext.scale(scale, scale);
+
+        pickingContext.translate(
+          element.rect.width / 2,
+          element.rect.height / 2
+        );
 
         pickingContext.drawImage(
           element.pickImage,
@@ -338,11 +351,12 @@ const Board: React.FC = () => {
           element.rect.top,
           element.rect.width,
           element.rect.height,
-          -element.rect.width / 2,
-          -element.rect.height / 2,
+          -(element.rect.width / 2),
+          -(element.rect.height / 2),
           element.rect.width,
           element.rect.height
         );
+
         pickingContext.restore();
       });
     }
@@ -370,12 +384,12 @@ const Board: React.FC = () => {
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
     };
-  }, [currentSite, isDrag, drawElements, pickingElements]);
+  }, [currentSite, isDrag]);
 
   useEffect(() => {
     updatePickingCanvas();
     requestAnimationFrame(updatePickingCanvas);
-  }, [currentSite, isDrag, drawElements, pickingElements]);
+  }, [isDrag, pickingElements]);
 
   useEffect(() => {
     setMainContext(
