@@ -7,7 +7,7 @@ export const enum ToolType {
   IMAGE,
 }
 
-export type Site = [number, number];
+export type Site = { x: number; y: number };
 
 export interface Color {
   r: number;
@@ -37,6 +37,7 @@ export interface DrawElement extends CanvasElement {
 export interface PickingElement extends CanvasElement {
   rect: Rect;
   pickImage: HTMLImageElement;
+  translate: Site;
 }
 
 export interface LineElement extends DrawElement {}

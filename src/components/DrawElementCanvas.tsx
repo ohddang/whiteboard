@@ -21,7 +21,9 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
 
       if (ctx && el.imageData) {
         ctx.putImageData(el.imageData, 0, 0);
-        canvasRef.current.style.transform = `translate(${el.rect.left}px, ${el.rect.top}px)`;
+        canvasRef.current.style.transform = `translate(${el.rect.left}px, ${
+          el.rect.top
+        }px) rotate(${1}deg)`;
       }
       if (el.isSelect) {
         canvasRef.current.style.outline = "5px solid red";
