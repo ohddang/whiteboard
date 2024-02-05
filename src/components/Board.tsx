@@ -8,9 +8,14 @@ import {
   PickingElement,
   Color,
   ToolType,
+  TransformToolType,
 } from "../type/common";
 import DrawElementCanvas from "./DrawElementCanvas";
-import { useSelectedToolStore, useSelectionLayoutStyle } from "../store/store";
+import {
+  useSelectedToolStore,
+  useSelectionLayoutStyle,
+  useTransformToolStore,
+} from "../store/store";
 import select from "/assets/select.svg";
 
 const Board: React.FC = () => {
@@ -43,6 +48,7 @@ const Board: React.FC = () => {
 
   const { tool, setTool, getTool } = useSelectedToolStore();
   const { getStyle } = useSelectionLayoutStyle();
+  const { setTransformTool, getTransformTool } = useTransformToolStore();
 
   const onMouseDown = (e: MouseEvent) => {
     switch (getTool()) {
@@ -71,6 +77,8 @@ const Board: React.FC = () => {
       default:
         break;
     }
+    setIsDrag(true);
+    setCurrentSite({ x: e.pageX, y: e.pageY });
   };
 
   const onMouseMove = (e: MouseEvent) => {
@@ -89,10 +97,17 @@ const Board: React.FC = () => {
 
           path.push({ x: e.pageX, y: e.pageY });
           setPath(path);
-          setCurrentSite({ x: e.pageX, y: e.pageY });
         }
         break;
       case ToolType.MOVE:
+        break;
+      default:
+        break;
+    }
+
+    const transformTool = getTransformTool();
+    switch (transformTool) {
+      case TransformToolType.MOVE:
         if (isDrag) {
           if (path && path.length > 1) {
             const prePosition: Site | undefined = path.pop();
@@ -100,16 +115,24 @@ const Board: React.FC = () => {
 
             const moveX = e.pageX - prePosition.x;
             const moveY = e.pageY - prePosition.y;
-            transformSelectElement(moveX, moveY);
+            translateSelectElement(moveX, moveY);
           }
           path.push({ x: e.pageX, y: e.pageY });
           setPath(path);
-          setCurrentSite({ x: e.pageX, y: e.pageY });
+        }
+        break;
+      case TransformToolType.ROTATE:
+        if (isDrag) {
+          const deltaX = (e.pageX - currentSite.x) * 0.2;
+          const deltaY = (e.pageY - currentSite.y) * 0.2;
+          rotateSelectElement(e.pageX, e.pageY, deltaX, deltaY); // TODO : getboundingBox로
         }
         break;
       default:
         break;
     }
+
+    setCurrentSite({ x: e.pageX, y: e.pageY });
   };
 
   const onMouseUp = (e: MouseEvent) => {
@@ -153,11 +176,39 @@ const Board: React.FC = () => {
     }
   };
 
-  const transformSelectElement = (x: number, y: number) => {
+  const translateSelectElement = (x: number, y: number) => {
     const newDrawElements = drawElements.map((element) => {
       if (element.isSelect) {
         element.rect.left += x;
         element.rect.top += y;
+      }
+      return element;
+    });
+    setDrawElements(newDrawElements);
+  };
+
+  const rotateSelectElement = (
+    mouseX: number,
+    mouseY: number,
+    deltaX: number,
+    deltaY: number
+  ) => {
+    const newDrawElements = drawElements.map((element) => {
+      if (element.isSelect) {
+        if (selectionLayoutRef.current) {
+          const rect = selectionLayoutRef.current.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+
+          let dx = deltaX;
+          let dy = deltaY;
+          if (mouseY > centerY) dx *= -1;
+          if (mouseX < centerX) dy *= -1;
+
+          const angle = dx + dy;
+
+          element.rotate += angle;
+        }
       }
       return element;
     });
@@ -242,6 +293,10 @@ const Board: React.FC = () => {
         b: pickingColorRef.current.b,
         a: pickingColorRef.current.a,
       },
+      translate: { x: 0, y: 0 },
+      rotate: 0,
+      scale: { x: 1, y: 1 },
+
       isSelect: false,
       usedTool: tool,
     };
@@ -263,6 +318,8 @@ const Board: React.FC = () => {
       },
 
       translate: { x: rect.left, y: rect.top },
+      rotate: 0,
+      scale: { x: 1, y: 1 },
     };
 
     newPickingElement.pickImage.width = newPickingElement.rect.width;
@@ -343,15 +400,14 @@ const Board: React.FC = () => {
           element.translate.x + element.rect.width / 2,
           element.translate.y + element.rect.height / 2
         );
-        pickingContext.rotate(15 * (Math.PI / 180));
+        pickingContext.rotate(element.rotate * (Math.PI / 180));
 
         pickingContext.translate(
           -element.rect.width / 2,
           -element.rect.height / 2
         );
 
-        const scale = 1.2;
-        pickingContext.scale(scale, scale);
+        pickingContext.scale(element.scale.x, element.scale.y);
 
         pickingContext.translate(
           element.rect.width / 2,
@@ -456,7 +512,12 @@ const Board: React.FC = () => {
             ref={pickingCanvas}
           ></canvas>
           {isSelectRef.current && (
-            <div className="selection_layout" ref={selectionLayoutRef}>
+            <div
+              className="selection_layout"
+              ref={selectionLayoutRef}
+              // onMouseDown={() => setTransformTool(TransformToolType.MOVE)}
+              // onMouseUp={() => setTransformTool(TransformToolType.NONE)}
+            >
               <div className="transform_tool_container">
                 <div className="scale_tool_1"></div>
                 <div className="scale_tool_2"></div>
@@ -466,7 +527,11 @@ const Board: React.FC = () => {
                 <div className="scale_tool_6"></div>
                 <div className="scale_tool_7"></div>
                 <div className="scale_tool_8"></div>
-                <div className="rotate_tool"></div>
+                <div
+                  className="rotate_tool"
+                  onMouseDown={() => setTransformTool(TransformToolType.ROTATE)}
+                  onMouseUp={() => setTransformTool(TransformToolType.NONE)}
+                ></div>
               </div>
             </div>
           )}

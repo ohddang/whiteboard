@@ -7,6 +7,20 @@ export const enum ToolType {
   IMAGE,
 }
 
+export const enum TransformToolType {
+  NONE = 0,
+  MOVE,
+  ROTATE,
+  SCALE_1,
+  SCALE_2,
+  SCALE_3,
+  SCALE_4,
+  SCALE_5,
+  SCALE_6,
+  SCALE_7,
+  SCALE_8,
+}
+
 export type Site = { x: number; y: number };
 
 export interface Color {
@@ -26,6 +40,9 @@ export interface Rect {
 export interface CanvasElement {
   rect: Rect;
   pickingColor: Color;
+  translate: Site;
+  rotate: number;
+  scale: Site;
 }
 
 export interface DrawElement extends CanvasElement {
@@ -37,7 +54,6 @@ export interface DrawElement extends CanvasElement {
 export interface PickingElement extends CanvasElement {
   rect: Rect;
   pickImage: HTMLImageElement;
-  translate: Site;
 }
 
 export interface LineElement extends DrawElement {}

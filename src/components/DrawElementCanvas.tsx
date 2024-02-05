@@ -25,17 +25,18 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
         ctx.putImageData(el.imageData, 0, 0);
 
         const translate = `translate(${el.rect.left}px, ${el.rect.top}px)`;
-        const rotate = `rotate(${15}deg)`;
+        const rotate = `rotate(${el.rotate}deg)`;
+
         const translateOrigin = `translate(${-el.rect.width / 2}px, ${
           -el.rect.height / 2
         }px)`;
-        const scale = `scale(${1.2}, ${1.2})`;
+        const scale = `scale(${el.scale.x}, ${el.scale.y})`;
         const translateRevert = `translate(${el.rect.width / 2}px, ${
           el.rect.height / 2
         }px)`;
 
         canvasRef.current.style.transform = `${translate} ${rotate} ${translateOrigin} ${scale} ${translateRevert}`;
-
+        console.log(el.rect.left, el.rect.top);
         if (el.isSelect) {
           setStyle({
             width: `${el.rect.width}px`,
@@ -45,29 +46,18 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
         }
       }
     }
-  }, [el.isSelect, el.rect.left, el.rect.top, el.rect.width, el.rect.height]);
+  }, [
+    el.isSelect,
+    el.rect.left,
+    el.rect.top,
+    el.rect.width,
+    el.rect.height,
+    el.rotate,
+  ]);
 
   return (
     <>
       <canvas className="draw_element" ref={canvasRef}></canvas>
-      {/* {true && (
-        <div className="selection_layout" ref={selectionLayoutRef}>
-          <div
-            className="transform_tool_container"
-            onClick={() => setTool(ToolType.MOVE)}
-          >
-            <div className="scale_tool_1"></div>
-            <div className="scale_tool_2"></div>
-            <div className="scale_tool_3"></div>
-            <div className="scale_tool_4"></div>
-            <div className="scale_tool_5"></div>
-            <div className="scale_tool_6"></div>
-            <div className="scale_tool_7"></div>
-            <div className="scale_tool_8"></div>
-            <div className="rotate_tool"></div>
-          </div>
-        </div>
-      )} */}
     </>
   );
 };

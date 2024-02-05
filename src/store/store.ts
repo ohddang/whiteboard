@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ToolType } from "../type/common";
+import { ToolType, TransformToolType } from "../type/common";
 
 type ToolFixFlag = {
   isFixed: boolean;
@@ -34,6 +34,23 @@ export const useSelectedToolStore = create<SelectedTool & SelectedToolActions>(
     getTool: () => get().tool,
   })
 );
+
+type TransformTool = {
+  tool: TransformToolType;
+};
+
+type TransformToolActions = {
+  setTransformTool: (tool: TransformToolType) => void;
+  getTransformTool: () => TransformToolType;
+};
+
+export const useTransformToolStore = create<
+  TransformTool & TransformToolActions
+>((set, get) => ({
+  tool: TransformToolType.MOVE,
+  setTransformTool: (tool: TransformToolType) => set({ tool: tool }),
+  getTransformTool: () => get().tool,
+}));
 
 type SelectionLayoutStyle = {
   width: string;
