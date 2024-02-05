@@ -1,72 +1,135 @@
-.drawElement {
-  position: absolute;
-  top: 0;
-}
-
 .board {
   position: relative;
   width: 100vw;
-  height: 100%;
+  height: 100vh;
+  background: transparent;
 }
 
 .canvas_container {
+  width: 100%;
+  height: 100%;
   position: relative;
+  background: transparent;
+}
+.canvas_container > canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.picking_canvas {
+  opacity: 0.5;
+}
+
+.draw_element {
+  position: absolute;
+}
+
+.selection_layout {
+  position: absolute;
+  background: transparent;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.transform_tool_container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  outline: 2px solid rgb(0, 0, 0);
+}
+.transform_tool_container > div {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  outline: 1px solid rgb(0, 0, 0);
+  background: white;
+}
+
+.scale_tool_1 {
+  top: calc(0% - 5px);
+  left: calc(0% - 5px);
+}
+
+.scale_tool_2 {
+  top: calc(0% - 5px);
+  left: calc(50% - 5px);
+}
+
+.scale_tool_3 {
+  top: calc(0% - 5px);
+  left: calc(100% - 5px);
+}
+
+.scale_tool_4 {
+  top: calc(50% - 5px);
+  left: calc(0% - 5px);
+}
+
+.scale_tool_5 {
+  top: calc(50% - 5px);
+  left: calc(100% - 5px);
+}
+
+.scale_tool_6 {
+  top: calc(100% - 5px);
+  left: calc(0% - 5px);
+}
+
+.scale_tool_7 {
+  top: calc(100% - 5px);
+  left: calc(50% - 5px);
+}
+
+.scale_tool_8 {
+  top: calc(100% - 5px);
+  left: calc(100% - 5px);
+}
+
+.rotate_tool {
+  top: -25px;
+  left: calc(50% - 5px);
+  border-radius: 50%;
+}
+
+.tool_box_container {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100vw;
-  height: 100vh;
-  background-color: beige;
-}
-.canvas_container > div {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  top: 0;
-  left: 0;
-  background: red;
-}
-
-.main {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  top: 0;
-  left: 0;
-  background: red;
-}
-
-.picking {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  top: 0;
-  left: 0;
-  background: red;
+  height: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .tool_box {
-  position: fixed;
-  top: 20px;
-  left: 120px;
   display: flex;
+  justify-content: center;
   flex-direction: row;
-  gap: 20px;
+  left: 0;
+  padding: 0;
   width: 100%;
-  list-style: none;
+  height: 40px;
 }
-.tool_box > li {
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
-  text-align: center;
+
+.tool_button {
+  width: 40px;
+  height: 40px;
+  background-color: rgb(255, 255, 255);
   border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  outline: 1px solid rgba(0, 0, 0, 0.25);
 }
-.tool_box > li > button {
-  width: 100px;
-  height: 50px;
-  background: #508000;
-  color: white;
-  font-size: 20px;
-  border-radius: 10px;
-  border: none;
+.tool_button:hover {
+  background-color: rgb(230, 230, 230);
+}
+.tool_button.select {
+  background-color: rgb(50, 120, 255);
 }
 
 .tool_box_detail {
@@ -96,6 +159,19 @@
   font-size: 20px;
   border-radius: 10px;
   border: none;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+  inset: 0;
 }
 
 /*# sourceMappingURL=style.css.map */

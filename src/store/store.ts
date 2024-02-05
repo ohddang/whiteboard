@@ -34,3 +34,24 @@ export const useSelectedToolStore = create<SelectedTool & SelectedToolActions>(
     getTool: () => get().tool,
   })
 );
+
+type SelectionLayoutStyle = {
+  width: string;
+  height: string;
+  transform: string;
+};
+
+type SelectionLayoutStyleActions = {
+  setStyle: (style: SelectionLayoutStyle) => void;
+  getStyle: () => SelectionLayoutStyle;
+};
+
+export const useSelectionLayoutStyle = create<
+  SelectionLayoutStyle & SelectionLayoutStyleActions
+>((set, get) => ({
+  width: "0",
+  height: "0",
+  transform: "translate(0px, 0px)",
+  setStyle: (style: SelectionLayoutStyle) => set(style),
+  getStyle: () => get(),
+}));

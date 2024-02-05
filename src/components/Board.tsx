@@ -1,3 +1,5 @@
+import "./drawElement.scss";
+
 import { useState, useEffect, useRef } from "react";
 import {
   Site,
@@ -8,12 +10,22 @@ import {
   ToolType,
 } from "../type/common";
 import DrawElementCanvas from "./DrawElementCanvas";
-import { useSelectedToolStore } from "../store/store";
+import { useSelectedToolStore, useSelectionLayoutStyle } from "../store/store";
+import select from "/assets/select.svg";
 
 const Board: React.FC = () => {
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const pickingCanvas = useRef<HTMLCanvasElement>(null);
   const pickingDrawCanvas = useRef<HTMLCanvasElement>(null);
+
+  const selectionLayoutRef = useRef<HTMLDivElement>(null);
+  const pickingColorRef = useRef<Color>({
+    r: 0,
+    g: 0,
+    b: 0,
+    a: 0,
+  });
+  const isSelectRef = useRef<boolean>(false);
 
   const [mainContext, setMainContext] = useState<CanvasRenderingContext2D>();
   const [pickingContext, setPickingContext] =
@@ -23,17 +35,14 @@ const Board: React.FC = () => {
 
   const [path, setPath] = useState<Site[]>([]); // FIXME : [] -> start, end
   const [isDrag, setIsDrag] = useState<boolean>(false);
+
   const [drawElements, setDrawElements] = useState<DrawElement[]>([]);
   const [pickingElements, setPickingElements] = useState<PickingElement[]>([]);
-  const pickingColorRef = useRef<Color>({
-    r: 0,
-    g: 0,
-    b: 0,
-    a: 0,
-  }); // fix it type
 
   const [currentSite, setCurrentSite] = useState<Site>({ x: 0, y: 0 });
+
   const { tool, setTool, getTool } = useSelectedToolStore();
+  const { getStyle } = useSelectionLayoutStyle();
 
   const onMouseDown = (e: MouseEvent) => {
     switch (getTool()) {
@@ -51,12 +60,13 @@ const Board: React.FC = () => {
         }
         break;
       case ToolType.SELECT:
+        selectElement(e.pageX, e.pageY);
+        break;
       case ToolType.MOVE:
         setIsDrag(true);
         path.push({ x: e.pageX, y: e.pageY });
         setPath(path);
 
-        selectElement(e.pageX, e.pageY);
         break;
       default:
         break;
@@ -117,7 +127,7 @@ const Board: React.FC = () => {
         );
       }
     }
-    if (getTool() === ToolType.MOVE) {
+    if (getTool() === ToolType.MOVE || getTool() === ToolType.SELECT) {
       setIsDrag(false);
       transformPickingElements();
     }
@@ -273,14 +283,17 @@ const Board: React.FC = () => {
       pickingColorRef.current.b = pickColor[2];
       pickingColorRef.current.a = pickColor[3];
 
+      let isSelect = false;
       const newDrawElements = drawElements.map((element) => {
         element.isSelect =
           element.pickingColor.r === pickColor[0] &&
           element.pickingColor.g === pickColor[1] &&
           element.pickingColor.b === pickColor[2];
 
+        if (element.isSelect) isSelect = true;
         return element;
       });
+      isSelectRef.current = isSelect;
       setDrawElements(newDrawElements);
     }
   };
@@ -362,15 +375,34 @@ const Board: React.FC = () => {
     }
   };
 
+  const selectionLayoutStyle = getStyle();
+  if (selectionLayoutRef.current) {
+    selectionLayoutRef.current.style.width = selectionLayoutStyle.width;
+    selectionLayoutRef.current.style.height = selectionLayoutStyle.height;
+    selectionLayoutRef.current.style.transform = selectionLayoutStyle.transform;
+  }
+
   useEffect(() => {
-    if (pickingCanvas.current)
+    if (selectionLayoutRef.current) {
+      selectionLayoutRef.current.addEventListener("mousedown", onMouseDown);
+    }
+  }, [selectionLayoutRef.current]);
+
+  useEffect(() => {
+    if (pickingCanvas.current) {
       pickingCanvas.current.addEventListener("mousedown", onMouseDown);
+    }
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", onResize);
     window.addEventListener("load", onResize);
     return () => {
       if (pickingCanvas.current)
         pickingCanvas.current.removeEventListener("mousedown", onMouseDown);
+      if (selectionLayoutRef.current)
+        selectionLayoutRef.current.removeEventListener(
+          "mousedown",
+          onMouseDown
+        );
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("load", onResize);
@@ -418,7 +450,26 @@ const Board: React.FC = () => {
         <div className="canvas_container">
           <canvas className="picking_canvas" ref={pickingDrawCanvas}></canvas>
           <canvas className="main_canvas" ref={mainCanvas}></canvas>
-          <canvas className="picking_canvas" ref={pickingCanvas}></canvas>
+          <canvas
+            id="selected_canvas"
+            className="picking_canvas"
+            ref={pickingCanvas}
+          ></canvas>
+          {isSelectRef.current && (
+            <div className="selection_layout" ref={selectionLayoutRef}>
+              <div className="transform_tool_container">
+                <div className="scale_tool_1"></div>
+                <div className="scale_tool_2"></div>
+                <div className="scale_tool_3"></div>
+                <div className="scale_tool_4"></div>
+                <div className="scale_tool_5"></div>
+                <div className="scale_tool_6"></div>
+                <div className="scale_tool_7"></div>
+                <div className="scale_tool_8"></div>
+                <div className="rotate_tool"></div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
-import { DrawElement } from "../type/common";
 import "./drawElement.scss";
+import { useEffect, useRef } from "react";
+import { DrawElement, ToolType } from "../type/common";
+import { useSelectionLayoutStyle } from "../store/store";
 
 const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
   el,
@@ -8,7 +9,7 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
   el: DrawElement;
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const { setStyle } = useSelectionLayoutStyle();
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -35,11 +36,12 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
 
         canvasRef.current.style.transform = `${translate} ${rotate} ${translateOrigin} ${scale} ${translateRevert}`;
 
-        if (canvasContainerRef.current) {
-          canvasContainerRef.current.style.width = `${el.rect.width}px`;
-          canvasContainerRef.current.style.height = `${el.rect.height}px`;
-          canvasContainerRef.current.style.transform =
-            canvasRef.current.style.transform;
+        if (el.isSelect) {
+          setStyle({
+            width: `${el.rect.width}px`,
+            height: `${el.rect.height}px`,
+            transform: `${translate} ${rotate} ${translateOrigin} ${scale} ${translateRevert}`,
+          });
         }
       }
     }
@@ -48,9 +50,12 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
   return (
     <>
       <canvas className="draw_element" ref={canvasRef}></canvas>
-      {el.isSelect && (
-        <div className="draw_element_tool" ref={canvasContainerRef}>
-          <div className="transform_tool_container">
+      {/* {true && (
+        <div className="selection_layout" ref={selectionLayoutRef}>
+          <div
+            className="transform_tool_container"
+            onClick={() => setTool(ToolType.MOVE)}
+          >
             <div className="scale_tool_1"></div>
             <div className="scale_tool_2"></div>
             <div className="scale_tool_3"></div>
@@ -62,7 +67,7 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
             <div className="rotate_tool"></div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };
