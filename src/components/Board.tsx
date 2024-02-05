@@ -16,7 +16,6 @@ import {
   useSelectionLayoutStyle,
   useTransformToolStore,
 } from "../store/store";
-import select from "/assets/select.svg";
 
 const Board: React.FC = () => {
   const mainCanvas = useRef<HTMLCanvasElement>(null);
@@ -156,6 +155,7 @@ const Board: React.FC = () => {
     }
     path.splice(0, path.length);
     setPath(path);
+    setTransformTool(TransformToolType.NONE);
   };
 
   const onResize = (e: any) => {
@@ -226,6 +226,7 @@ const Board: React.FC = () => {
         if (findElement) {
           element.translate.x = findElement.rect.left;
           element.translate.y = findElement.rect.top;
+          element.rotate = findElement.rotate;
         }
       }
       return element;
@@ -431,6 +432,15 @@ const Board: React.FC = () => {
     }
   };
 
+  const onTransformTool = (
+    event: React.MouseEvent<HTMLDivElement>,
+    tool: TransformToolType
+  ): void => {
+    event.stopPropagation();
+    if (getTransformTool() === TransformToolType.NONE) setTransformTool(tool);
+    console.log("onTransformTool", tool);
+  };
+
   const selectionLayoutStyle = getStyle();
   if (selectionLayoutRef.current) {
     selectionLayoutRef.current.style.width = selectionLayoutStyle.width;
@@ -515,8 +525,9 @@ const Board: React.FC = () => {
             <div
               className="selection_layout"
               ref={selectionLayoutRef}
-              // onMouseDown={() => setTransformTool(TransformToolType.MOVE)}
-              // onMouseUp={() => setTransformTool(TransformToolType.NONE)}
+              onMouseDown={(event) =>
+                onTransformTool(event, TransformToolType.MOVE)
+              }
             >
               <div className="transform_tool_container">
                 <div className="scale_tool_1"></div>
@@ -529,8 +540,9 @@ const Board: React.FC = () => {
                 <div className="scale_tool_8"></div>
                 <div
                   className="rotate_tool"
-                  onMouseDown={() => setTransformTool(TransformToolType.ROTATE)}
-                  onMouseUp={() => setTransformTool(TransformToolType.NONE)}
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.ROTATE)
+                  }
                 ></div>
               </div>
             </div>
