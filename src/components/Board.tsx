@@ -124,7 +124,19 @@ const Board: React.FC = () => {
         if (isDrag) {
           const deltaX = (e.pageX - currentSite.x) * 0.2;
           const deltaY = (e.pageY - currentSite.y) * 0.2;
-          rotateSelectElement(e.pageX, e.pageY, deltaX, deltaY); // TODO : getboundingBox로
+          rotateSelectElement(e.pageX, e.pageY, deltaX, deltaY);
+        }
+        break;
+      case TransformToolType.SCALE_1:
+      case TransformToolType.SCALE_2:
+      case TransformToolType.SCALE_3:
+      case TransformToolType.SCALE_4:
+      case TransformToolType.SCALE_5:
+      case TransformToolType.SCALE_6:
+      case TransformToolType.SCALE_7:
+      case TransformToolType.SCALE_8:
+        if (isDrag) {
+          scaleSelectElement(e.pageX, e.pageY, transformTool);
         }
         break;
       default:
@@ -176,11 +188,11 @@ const Board: React.FC = () => {
     }
   };
 
-  const translateSelectElement = (x: number, y: number) => {
+  const translateSelectElement = (dx: number, dy: number) => {
     const newDrawElements = drawElements.map((element) => {
       if (element.isSelect) {
-        element.rect.left += x;
-        element.rect.top += y;
+        element.rect.left += dx;
+        element.rect.top += dy;
       }
       return element;
     });
@@ -215,6 +227,67 @@ const Board: React.FC = () => {
     setDrawElements(newDrawElements);
   };
 
+  const scaleSelectElement = (
+    pageX: number,
+    pageY: number,
+    tool: TransformToolType
+  ) => {
+    const newDrawElements = drawElements.map((element) => {
+      if (element.isSelect) {
+        if (selectionLayoutRef.current) {
+          let px = pageX;
+          let py = pageY;
+          switch (tool) {
+            case TransformToolType.SCALE_1:
+              element.rect.left = px;
+              element.rect.top = py;
+              element.rect.width = element.rect.right - element.rect.left;
+              element.rect.height = element.rect.bottom - element.rect.top;
+              break;
+            case TransformToolType.SCALE_2:
+              element.rect.top = py;
+              element.rect.height = element.rect.bottom - element.rect.top;
+              break;
+            case TransformToolType.SCALE_3:
+              element.rect.top = py;
+              element.rect.right = px;
+              element.rect.width = element.rect.right - element.rect.left;
+              element.rect.height = element.rect.bottom - element.rect.top;
+              break;
+            case TransformToolType.SCALE_4:
+              element.rect.left = px;
+              element.rect.width = element.rect.right - element.rect.left;
+              break;
+            case TransformToolType.SCALE_5:
+              element.rect.right = px;
+              element.rect.width = element.rect.right - element.rect.left;
+              break;
+            case TransformToolType.SCALE_6:
+              element.rect.left = px;
+              element.rect.bottom = py;
+              element.rect.width = element.rect.right - element.rect.left;
+              element.rect.height = element.rect.bottom - element.rect.top;
+              break;
+            case TransformToolType.SCALE_7:
+              element.rect.bottom = py;
+              element.rect.height = element.rect.bottom - element.rect.top;
+              break;
+            case TransformToolType.SCALE_8:
+              element.rect.right = px;
+              element.rect.bottom = py;
+              element.rect.width = element.rect.right - element.rect.left;
+              element.rect.height = element.rect.bottom - element.rect.top;
+              break;
+          }
+          // TODO : scale 변경 시 redraw... 도형의 두점을 저장.. minx, miny, maxx, maxy 조합으로.. 저장
+          // ex) (minx, maxy) (maxx, miny) 이런식으로 저장하고 scale 변경 시 이 두점을 기준으로 다시 그리기
+        }
+      }
+      return element;
+    });
+    setDrawElements(newDrawElements);
+  };
+
   const transformPickingElements = () => {
     const newPickingElements = pickingElements.map((element) => {
       if (
@@ -227,6 +300,12 @@ const Board: React.FC = () => {
           element.translate.x = findElement.rect.left;
           element.translate.y = findElement.rect.top;
           element.rotate = findElement.rotate;
+          element.scale.x = findElement.scale.x;
+          element.scale.y = findElement.scale.y;
+          element.transformOrigin.x = findElement.transformOrigin.x;
+          element.transformOrigin.y = findElement.transformOrigin.y;
+          element.rect.width = findElement.rect.width;
+          element.rect.height = findElement.rect.height;
         }
       }
       return element;
@@ -266,6 +345,8 @@ const Board: React.FC = () => {
     return {
       left: min_x,
       top: min_y,
+      right: max_x,
+      bottom: max_y,
       width: max_x - min_x,
       height: max_y - min_y,
     };
@@ -297,6 +378,7 @@ const Board: React.FC = () => {
       translate: { x: 0, y: 0 },
       rotate: 0,
       scale: { x: 1, y: 1 },
+      transformOrigin: { x: 0, y: 0 },
 
       isSelect: false,
       usedTool: tool,
@@ -321,6 +403,7 @@ const Board: React.FC = () => {
       translate: { x: rect.left, y: rect.top },
       rotate: 0,
       scale: { x: 1, y: 1 },
+      transformOrigin: { x: 0, y: 0 },
     };
 
     newPickingElement.pickImage.width = newPickingElement.rect.width;
@@ -404,15 +487,15 @@ const Board: React.FC = () => {
         pickingContext.rotate(element.rotate * (Math.PI / 180));
 
         pickingContext.translate(
-          -element.rect.width / 2,
-          -element.rect.height / 2
+          element.transformOrigin.x,
+          element.transformOrigin.y
         );
 
         pickingContext.scale(element.scale.x, element.scale.y);
 
         pickingContext.translate(
-          element.rect.width / 2,
-          element.rect.height / 2
+          -element.transformOrigin.x,
+          -element.transformOrigin.y
         );
 
         pickingContext.drawImage(
@@ -438,7 +521,6 @@ const Board: React.FC = () => {
   ): void => {
     event.stopPropagation();
     if (getTransformTool() === TransformToolType.NONE) setTransformTool(tool);
-    console.log("onTransformTool", tool);
   };
 
   const selectionLayoutStyle = getStyle();
@@ -529,15 +611,58 @@ const Board: React.FC = () => {
                 onTransformTool(event, TransformToolType.MOVE)
               }
             >
-              <div className="transform_tool_container">
-                <div className="scale_tool_1"></div>
-                <div className="scale_tool_2"></div>
-                <div className="scale_tool_3"></div>
-                <div className="scale_tool_4"></div>
-                <div className="scale_tool_5"></div>
-                <div className="scale_tool_6"></div>
-                <div className="scale_tool_7"></div>
-                <div className="scale_tool_8"></div>
+              <div
+                className="transform_tool_container"
+                id="transform_tool_container"
+              >
+                <div
+                  className="scale_tool_1"
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.SCALE_1)
+                  }
+                ></div>
+                <div
+                  className="scale_tool_2"
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.SCALE_2)
+                  }
+                ></div>
+                <div
+                  className="scale_tool_3"
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.SCALE_3)
+                  }
+                ></div>
+                <div
+                  className="scale_tool_4"
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.SCALE_4)
+                  }
+                ></div>
+                <div
+                  className="scale_tool_5"
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.SCALE_5)
+                  }
+                ></div>
+                <div
+                  className="scale_tool_6"
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.SCALE_6)
+                  }
+                ></div>
+                <div
+                  className="scale_tool_7"
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.SCALE_7)
+                  }
+                ></div>
+                <div
+                  className="scale_tool_8"
+                  onMouseDown={(event) =>
+                    onTransformTool(event, TransformToolType.SCALE_8)
+                  }
+                ></div>
                 <div
                   className="rotate_tool"
                   onMouseDown={(event) =>

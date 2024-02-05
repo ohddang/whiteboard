@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ToolType, TransformToolType } from "../type/common";
+import { Site, ToolType, TransformToolType } from "../type/common";
 
 type ToolFixFlag = {
   isFixed: boolean;
@@ -69,6 +69,7 @@ export const useSelectionLayoutStyle = create<
   width: "0",
   height: "0",
   transform: "translate(0px, 0px)",
+  invertScale: { x: 1, y: 1 },
   setStyle: (style: SelectionLayoutStyle) => set(style),
   getStyle: () => get(),
 }));

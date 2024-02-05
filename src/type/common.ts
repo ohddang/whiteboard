@@ -33,6 +33,8 @@ export interface Color {
 export interface Rect {
   top: number;
   left: number;
+  right: number;
+  bottom: number;
   width: number;
   height: number;
 }
@@ -43,6 +45,7 @@ export interface CanvasElement {
   translate: Site;
   rotate: number;
   scale: Site;
+  transformOrigin: Site;
 }
 
 export interface DrawElement extends CanvasElement {

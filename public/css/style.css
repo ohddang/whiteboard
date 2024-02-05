@@ -30,8 +30,6 @@
 
 .selection_layout {
   position: absolute;
-  background: transparent;
-  background-color: rgba(0, 0, 0, 0);
 }
 
 .transform_tool_container {
@@ -51,45 +49,53 @@
 .scale_tool_1 {
   top: calc(0% - 5px);
   left: calc(0% - 5px);
+  background-color: red;
 }
 
 .scale_tool_2 {
   top: calc(0% - 5px);
   left: calc(50% - 5px);
+  background-color: red;
 }
 
 .scale_tool_3 {
   top: calc(0% - 5px);
   left: calc(100% - 5px);
+  background-color: red;
 }
 
 .scale_tool_4 {
   top: calc(50% - 5px);
   left: calc(0% - 5px);
+  background-color: blue;
 }
 
 .scale_tool_5 {
   top: calc(50% - 5px);
   left: calc(100% - 5px);
+  background-color: blue;
 }
 
 .scale_tool_6 {
   top: calc(100% - 5px);
   left: calc(0% - 5px);
+  background-color: green;
 }
 
 .scale_tool_7 {
   top: calc(100% - 5px);
   left: calc(50% - 5px);
+  background-color: green;
 }
 
 .scale_tool_8 {
   top: calc(100% - 5px);
   left: calc(100% - 5px);
+  background-color: green;
 }
 
 .rotate_tool {
-  top: -25px;
+  top: -20%;
   left: calc(50% - 5px);
   border-radius: 50%;
 }
@@ -113,6 +119,7 @@
   padding: 0;
   width: 100%;
   height: 40px;
+  gap: 20px;
 }
 
 .tool_button {
