@@ -1,21 +1,9 @@
 import "./drawElement.scss";
 
 import { useState, useEffect, useRef } from "react";
-import {
-  Site,
-  Rect,
-  DrawElement,
-  PickingElement,
-  Color,
-  ToolType,
-  TransformToolType,
-} from "../type/common";
+import { Site, Rect, DrawElement, PickingElement, Color, ToolType, TransformToolType } from "../type/common";
 import DrawElementCanvas from "./DrawElementCanvas";
-import {
-  useSelectedToolStore,
-  useSelectionLayoutStyle,
-  useTransformToolStore,
-} from "../store/store";
+import { useSelectedToolStore, useSelectionLayoutStyle, useTransformToolStore } from "../store/store";
 
 const Board: React.FC = () => {
   const mainCanvas = useRef<HTMLCanvasElement>(null);
@@ -32,10 +20,8 @@ const Board: React.FC = () => {
   const isSelectRef = useRef<boolean>(false);
 
   const [mainContext, setMainContext] = useState<CanvasRenderingContext2D>();
-  const [pickingContext, setPickingContext] =
-    useState<CanvasRenderingContext2D>();
-  const [pickingDrawContext, setPickingDrawContext] =
-    useState<CanvasRenderingContext2D>();
+  const [pickingContext, setPickingContext] = useState<CanvasRenderingContext2D>();
+  const [pickingDrawContext, setPickingDrawContext] = useState<CanvasRenderingContext2D>();
 
   const [path, setPath] = useState<Site[]>([]); // FIXME : [] -> start, end
   const [isDrag, setIsDrag] = useState<boolean>(false);
@@ -85,11 +71,7 @@ const Board: React.FC = () => {
       case ToolType.RECT:
       case ToolType.ARROW:
         if (isDrag) {
-          if (
-            Math.abs(path[0].x - e.pageX) < 10 &&
-            Math.abs(path[0].y - e.pageY) < 10
-          )
-            return;
+          if (Math.abs(path[0].x - e.pageX) < 10 && Math.abs(path[0].y - e.pageY) < 10) return;
 
           if (path.length > 1) path.pop();
 
@@ -154,12 +136,7 @@ const Board: React.FC = () => {
       addPickingElements();
 
       if (mainContext) {
-        mainContext.clearRect(
-          0,
-          0,
-          mainContext.canvas.width,
-          mainContext.canvas.height
-        );
+        mainContext.clearRect(0, 0, mainContext.canvas.width, mainContext.canvas.height);
       }
     }
     if (getTool() === ToolType.MOVE || getTool() === ToolType.SELECT) {
@@ -200,12 +177,7 @@ const Board: React.FC = () => {
     setDrawElements(newDrawElements);
   };
 
-  const rotateSelectElement = (
-    mouseX: number,
-    mouseY: number,
-    deltaX: number,
-    deltaY: number
-  ) => {
+  const rotateSelectElement = (mouseX: number, mouseY: number, deltaX: number, deltaY: number) => {
     const newDrawElements = drawElements.map((element) => {
       if (element.isSelect) {
         if (selectionLayoutRef.current) {
@@ -228,11 +200,7 @@ const Board: React.FC = () => {
     setDrawElements(newDrawElements);
   };
 
-  const scaleSelectElement = (
-    deltaX: number,
-    deltaY: number,
-    tool: TransformToolType
-  ) => {
+  const scaleSelectElement = (deltaX: number, deltaY: number, tool: TransformToolType) => {
     const newDrawElements = drawElements.map((element) => {
       if (element.isSelect) {
         if (selectionLayoutRef.current) {
@@ -273,7 +241,7 @@ const Board: React.FC = () => {
               element.scale.y += (dy / rect.height) * 2 * element.scale.y;
               break;
           }
-          // TODO : drawElementCanvas에서 canvas렌더링 방식 변경 image -> canvas에서 그리도록 변경
+          // TODO : drawElementCanvas에서 canvas렌더링 방식 변경 image -> canvas에서 그리도록 변경 검토
           //        pickingElement도 redraw하도록 변경
         }
       }
@@ -353,12 +321,7 @@ const Board: React.FC = () => {
 
     const newElement: DrawElement = {
       rect: rect,
-      imageData: ctx.getImageData(
-        rect.left,
-        rect.top,
-        Math.max(1, rect.width),
-        Math.max(1, rect.height)
-      ),
+      imageData: ctx.getImageData(rect.left, rect.top, Math.max(1, rect.width), Math.max(1, rect.height)),
       pickingColor: {
         r: pickingColorRef.current.r,
         g: pickingColorRef.current.g,
@@ -459,12 +422,7 @@ const Board: React.FC = () => {
 
   const updatePickingCanvas = () => {
     if (pickingContext) {
-      pickingContext.clearRect(
-        0,
-        0,
-        pickingContext.canvas.width,
-        pickingContext.canvas.height
-      );
+      pickingContext.clearRect(0, 0, pickingContext.canvas.width, pickingContext.canvas.height);
 
       console.log(pickingElements);
       pickingElements.forEach((element) => {
@@ -494,10 +452,7 @@ const Board: React.FC = () => {
     }
   };
 
-  const onTransformTool = (
-    event: React.MouseEvent<HTMLDivElement>,
-    tool: TransformToolType
-  ): void => {
+  const onTransformTool = (event: React.MouseEvent<HTMLDivElement>, tool: TransformToolType): void => {
     event.stopPropagation();
     if (getTransformTool() === TransformToolType.NONE) setTransformTool(tool);
   };
@@ -531,13 +486,8 @@ const Board: React.FC = () => {
     window.addEventListener("resize", onResize);
     window.addEventListener("load", onResize);
     return () => {
-      if (pickingCanvas.current)
-        pickingCanvas.current.removeEventListener("mousedown", onMouseDown);
-      if (selectionLayoutRef.current)
-        selectionLayoutRef.current.removeEventListener(
-          "mousedown",
-          onMouseDown
-        );
+      if (pickingCanvas.current) pickingCanvas.current.removeEventListener("mousedown", onMouseDown);
+      if (selectionLayoutRef.current) selectionLayoutRef.current.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("load", onResize);
@@ -559,17 +509,9 @@ const Board: React.FC = () => {
   }, [isDrag, pickingElements]);
 
   useEffect(() => {
-    setMainContext(
-      mainCanvas.current?.getContext("2d") || ({} as CanvasRenderingContext2D)
-    );
-    setPickingContext(
-      pickingCanvas.current?.getContext("2d") ||
-        ({} as CanvasRenderingContext2D)
-    );
-    setPickingDrawContext(
-      pickingDrawCanvas.current?.getContext("2d") ||
-        ({} as CanvasRenderingContext2D)
-    );
+    setMainContext(mainCanvas.current?.getContext("2d") || ({} as CanvasRenderingContext2D));
+    setPickingContext(pickingCanvas.current?.getContext("2d") || ({} as CanvasRenderingContext2D));
+    setPickingDrawContext(pickingDrawCanvas.current?.getContext("2d") || ({} as CanvasRenderingContext2D));
   }, []);
 
   useEffect(() => {
@@ -585,77 +527,40 @@ const Board: React.FC = () => {
         <div className="canvas_container">
           <canvas className="picking_canvas" ref={pickingDrawCanvas}></canvas>
           <canvas className="main_canvas" ref={mainCanvas}></canvas>
-          <canvas
-            id="selected_canvas"
-            className="picking_canvas"
-            ref={pickingCanvas}
-          ></canvas>
+          <canvas id="selected_canvas" className="picking_canvas" ref={pickingCanvas}></canvas>
           {isSelectRef.current && (
             <div
               className="selection_layout"
               ref={selectionLayoutRef}
-              onMouseDown={(event) =>
-                onTransformTool(event, TransformToolType.MOVE)
-              }
-            >
-              <div
-                className="transform_tool_container"
-                id="transform_tool_container"
-              >
+              onMouseDown={(event) => onTransformTool(event, TransformToolType.MOVE)}>
+              <div className="transform_tool_container" id="transform_tool_container">
                 <div
                   className="scale_tool_1"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.SCALE_1)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.SCALE_1)}></div>
                 <div
                   className="scale_tool_2"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.SCALE_2)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.SCALE_2)}></div>
                 <div
                   className="scale_tool_3"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.SCALE_3)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.SCALE_3)}></div>
                 <div
                   className="scale_tool_4"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.SCALE_4)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.SCALE_4)}></div>
                 <div
                   className="scale_tool_5"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.SCALE_5)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.SCALE_5)}></div>
                 <div
                   className="scale_tool_6"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.SCALE_6)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.SCALE_6)}></div>
                 <div
                   className="scale_tool_7"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.SCALE_7)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.SCALE_7)}></div>
                 <div
                   className="scale_tool_8"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.SCALE_8)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.SCALE_8)}></div>
                 <div
                   className="rotate_tool"
-                  onMouseDown={(event) =>
-                    onTransformTool(event, TransformToolType.ROTATE)
-                  }
-                ></div>
+                  onMouseDown={(event) => onTransformTool(event, TransformToolType.ROTATE)}></div>
               </div>
             </div>
           )}

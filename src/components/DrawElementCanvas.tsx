@@ -3,11 +3,7 @@ import { useEffect, useRef } from "react";
 import { DrawElement, ToolType } from "../type/common";
 import { useSelectionLayoutStyle } from "../store/store";
 
-const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
-  el,
-}: {
-  el: DrawElement;
-}) => {
+const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElement }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { setStyle } = useSelectionLayoutStyle();
 
