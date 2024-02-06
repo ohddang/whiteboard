@@ -196,6 +196,9 @@ const Board: React.FC = () => {
         // TODO : element rotate값 고려하여 translate값 변경 필요
         element.rect.left += dx;
         element.rect.top += dy;
+
+        element.translate.x += dx;
+        element.translate.y += dy;
       }
       return element;
     });
@@ -293,8 +296,8 @@ const Board: React.FC = () => {
       ) {
         const findElement = drawElements.find((el) => el.isSelect === true);
         if (findElement) {
-          element.translate.x = findElement.rect.left;
-          element.translate.y = findElement.rect.top;
+          element.translate.x = findElement.translate.x;
+          element.translate.y = findElement.translate.y;
           element.rotate = findElement.rotate;
           element.scale.x = findElement.scale.x;
           element.scale.y = findElement.scale.y;
@@ -476,8 +479,8 @@ const Board: React.FC = () => {
       pickingElements.forEach((element) => {
         pickingContext.save();
         pickingContext.translate(
-          element.rect.left + element.rect.width / 2,
-          element.rect.top + element.rect.height / 2
+          element.rect.left + element.rect.width / 2 + element.translate.x,
+          element.rect.top + element.rect.height / 2 + element.translate.y
         );
         pickingContext.rotate(element.rotate * (Math.PI / 180));
 
@@ -494,6 +497,8 @@ const Board: React.FC = () => {
           element.rect.width,
           element.rect.height
         );
+
+        console.log(element.rect.left, element.rect.top);
 
         pickingContext.restore();
       });
