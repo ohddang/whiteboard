@@ -296,16 +296,15 @@ const Board: React.FC = () => {
       ) {
         const findElement = drawElements.find((el) => el.isSelect === true);
         if (findElement) {
-          element.translate.x = findElement.translate.x;
-          element.translate.y = findElement.translate.y;
+          element.translate.x = findElement.rect.left;
+          element.translate.y = findElement.rect.top;
+
           element.rotate = findElement.rotate;
           element.scale.x = findElement.scale.x;
           element.scale.y = findElement.scale.y;
           element.rect.width = findElement.rect.width;
           element.rect.height = findElement.rect.height;
 
-          element.rect.left = findElement.rect.left;
-          element.rect.top = findElement.rect.top;
           console.log("update picking element");
         }
       }
@@ -374,7 +373,7 @@ const Board: React.FC = () => {
         b: pickingColorRef.current.b,
         a: pickingColorRef.current.a,
       },
-      translate: { x: 0, y: 0 },
+      translate: { x: 0, y: 0 }, // FIXME : 초기값 left, right>
       rotate: 0,
       scale: { x: 1, y: 1 },
 
@@ -479,8 +478,8 @@ const Board: React.FC = () => {
       pickingElements.forEach((element) => {
         pickingContext.save();
         pickingContext.translate(
-          element.rect.left + element.rect.width / 2 + element.translate.x,
-          element.rect.top + element.rect.height / 2 + element.translate.y
+          element.translate.x + element.rect.width / 2,
+          element.translate.y + element.rect.height / 2
         );
         pickingContext.rotate(element.rotate * (Math.PI / 180));
 
