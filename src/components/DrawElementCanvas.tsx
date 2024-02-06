@@ -24,7 +24,7 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
       if (ctx && el.imageData) {
         ctx.putImageData(el.imageData, 0, 0);
 
-        const translate = `translate(${el.rect.left}px, ${el.rect.top}px)`;
+        const translate = `translate(${el.translate.x}px, ${el.translate.y}px)`;
         const rotate = `rotate(${el.rotate}deg)`;
         const scale = `scale(${el.scale.x}, ${el.scale.y})`;
 
@@ -49,7 +49,8 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
     el.rotate,
     el.scale.x,
     el.scale.y,
-    el.translate,
+    el.translate.x,
+    el.translate.y,
   ]);
 
   return (
