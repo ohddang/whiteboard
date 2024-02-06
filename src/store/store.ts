@@ -56,6 +56,7 @@ type SelectionLayoutStyle = {
   width: string;
   height: string;
   transform: string;
+  invertScale: Site;
 };
 
 type SelectionLayoutStyleActions = {

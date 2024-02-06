@@ -26,18 +26,16 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({
 
         const translate = `translate(${el.rect.left}px, ${el.rect.top}px)`;
         const rotate = `rotate(${el.rotate}deg)`;
-
-        const translateOrigin = `translate(${el.transformOrigin.x}px, ${el.transformOrigin.y}px)`;
         const scale = `scale(${el.scale.x}, ${el.scale.y})`;
-        const translateRevert = `translate(${-el.transformOrigin.x}px, ${-el
-          .transformOrigin.y}px)`;
 
-        canvasRef.current.style.transform = `${translate} ${rotate} ${translateOrigin} ${scale} ${translateRevert}`;
+        canvasRef.current.style.transform = `${translate} ${rotate} ${scale}`;
+
         if (el.isSelect) {
           setStyle({
             width: `${el.rect.width}px`,
             height: `${el.rect.height}px`,
-            transform: `${translate} ${rotate} ${translateOrigin} ${scale} ${translateRevert}`,
+            transform: `${translate} ${rotate} ${scale}`,
+            invertScale: { x: 1 / el.scale.x, y: 1 / el.scale.y },
           });
         }
       }

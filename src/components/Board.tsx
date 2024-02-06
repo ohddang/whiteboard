@@ -136,7 +136,9 @@ const Board: React.FC = () => {
       case TransformToolType.SCALE_7:
       case TransformToolType.SCALE_8:
         if (isDrag) {
-          scaleSelectElement(e.pageX, e.pageY, transformTool);
+          const deltaX = e.pageX - currentSite.x;
+          const deltaY = e.pageY - currentSite.y;
+          scaleSelectElement(deltaX, deltaY, transformTool);
         }
         break;
       default:
@@ -191,6 +193,7 @@ const Board: React.FC = () => {
   const translateSelectElement = (dx: number, dy: number) => {
     const newDrawElements = drawElements.map((element) => {
       if (element.isSelect) {
+        // TODO : element rotate값 고려하여 translate값 변경 필요
         element.rect.left += dx;
         element.rect.top += dy;
       }
@@ -228,59 +231,52 @@ const Board: React.FC = () => {
   };
 
   const scaleSelectElement = (
-    pageX: number,
-    pageY: number,
+    deltaX: number,
+    deltaY: number,
     tool: TransformToolType
   ) => {
     const newDrawElements = drawElements.map((element) => {
       if (element.isSelect) {
         if (selectionLayoutRef.current) {
-          let px = pageX;
-          let py = pageY;
+          const rect = selectionLayoutRef.current.getBoundingClientRect();
+          let radian;
+          let dx;
+          let dy;
+          radian = -element.rotate * (Math.PI / 180);
+          dx = deltaX * Math.cos(radian) - deltaY * Math.sin(radian);
+          dy = deltaX * Math.sin(radian) + deltaY * Math.cos(radian);
           switch (tool) {
             case TransformToolType.SCALE_1:
-              element.rect.left = px;
-              element.rect.top = py;
-              element.rect.width = element.rect.right - element.rect.left;
-              element.rect.height = element.rect.bottom - element.rect.top;
+              element.scale.x += (dx / rect.width) * 2 * element.scale.x * -1;
+              element.scale.y += (dy / rect.height) * 2 * element.scale.y * -1;
               break;
             case TransformToolType.SCALE_2:
-              element.rect.top = py;
-              element.rect.height = element.rect.bottom - element.rect.top;
+              element.scale.y += (dy / rect.height) * 2 * element.scale.y * -1;
               break;
             case TransformToolType.SCALE_3:
-              element.rect.top = py;
-              element.rect.right = px;
-              element.rect.width = element.rect.right - element.rect.left;
-              element.rect.height = element.rect.bottom - element.rect.top;
+              element.scale.x += (dx / rect.width) * 2 * element.scale.x;
+              element.scale.y += (dy / rect.height) * 2 * element.scale.y * -1;
               break;
             case TransformToolType.SCALE_4:
-              element.rect.left = px;
-              element.rect.width = element.rect.right - element.rect.left;
+              element.scale.x += (dx / rect.width) * 2 * element.scale.x * -1;
               break;
             case TransformToolType.SCALE_5:
-              element.rect.right = px;
-              element.rect.width = element.rect.right - element.rect.left;
+              element.scale.x += (dx / rect.width) * 2 * element.scale.x;
               break;
             case TransformToolType.SCALE_6:
-              element.rect.left = px;
-              element.rect.bottom = py;
-              element.rect.width = element.rect.right - element.rect.left;
-              element.rect.height = element.rect.bottom - element.rect.top;
+              element.scale.x += (dx / rect.width) * 2 * element.scale.x * -1;
+              element.scale.y += (dy / rect.height) * 2 * element.scale.y;
               break;
             case TransformToolType.SCALE_7:
-              element.rect.bottom = py;
-              element.rect.height = element.rect.bottom - element.rect.top;
+              element.scale.y += (dy / rect.height) * 2 * element.scale.y;
               break;
             case TransformToolType.SCALE_8:
-              element.rect.right = px;
-              element.rect.bottom = py;
-              element.rect.width = element.rect.right - element.rect.left;
-              element.rect.height = element.rect.bottom - element.rect.top;
+              element.scale.x += (dx / rect.width) * 2 * element.scale.x;
+              element.scale.y += (dy / rect.height) * 2 * element.scale.y;
               break;
           }
-          // TODO : scale 변경 시 redraw... 도형의 두점을 저장.. minx, miny, maxx, maxy 조합으로.. 저장
-          // ex) (minx, maxy) (maxx, miny) 이런식으로 저장하고 scale 변경 시 이 두점을 기준으로 다시 그리기
+          // TODO : drawElementCanvas에서 canvas렌더링 방식 변경 image -> canvas에서 그리도록 변경
+          //        pickingElement도 redraw하도록 변경
         }
       }
       return element;
@@ -302,10 +298,12 @@ const Board: React.FC = () => {
           element.rotate = findElement.rotate;
           element.scale.x = findElement.scale.x;
           element.scale.y = findElement.scale.y;
-          element.transformOrigin.x = findElement.transformOrigin.x;
-          element.transformOrigin.y = findElement.transformOrigin.y;
           element.rect.width = findElement.rect.width;
           element.rect.height = findElement.rect.height;
+
+          element.rect.left = findElement.rect.left;
+          element.rect.top = findElement.rect.top;
+          console.log("update picking element");
         }
       }
       return element;
@@ -345,8 +343,6 @@ const Board: React.FC = () => {
     return {
       left: min_x,
       top: min_y,
-      right: max_x,
-      bottom: max_y,
       width: max_x - min_x,
       height: max_y - min_y,
     };
@@ -378,7 +374,6 @@ const Board: React.FC = () => {
       translate: { x: 0, y: 0 },
       rotate: 0,
       scale: { x: 1, y: 1 },
-      transformOrigin: { x: 0, y: 0 },
 
       isSelect: false,
       usedTool: tool,
@@ -403,7 +398,6 @@ const Board: React.FC = () => {
       translate: { x: rect.left, y: rect.top },
       rotate: 0,
       scale: { x: 1, y: 1 },
-      transformOrigin: { x: 0, y: 0 },
     };
 
     newPickingElement.pickImage.width = newPickingElement.rect.width;
@@ -478,25 +472,16 @@ const Board: React.FC = () => {
         pickingContext.canvas.height
       );
 
+      console.log(pickingElements);
       pickingElements.forEach((element) => {
         pickingContext.save();
         pickingContext.translate(
-          element.translate.x + element.rect.width / 2,
-          element.translate.y + element.rect.height / 2
+          element.rect.left + element.rect.width / 2,
+          element.rect.top + element.rect.height / 2
         );
         pickingContext.rotate(element.rotate * (Math.PI / 180));
 
-        pickingContext.translate(
-          element.transformOrigin.x,
-          element.transformOrigin.y
-        );
-
         pickingContext.scale(element.scale.x, element.scale.y);
-
-        pickingContext.translate(
-          -element.transformOrigin.x,
-          -element.transformOrigin.y
-        );
 
         pickingContext.drawImage(
           element.pickImage,
@@ -528,6 +513,14 @@ const Board: React.FC = () => {
     selectionLayoutRef.current.style.width = selectionLayoutStyle.width;
     selectionLayoutRef.current.style.height = selectionLayoutStyle.height;
     selectionLayoutRef.current.style.transform = selectionLayoutStyle.transform;
+
+    const transformTool = document.getElementById("transform_tool_container");
+    if (transformTool) {
+      transformTool.childNodes.forEach((node) => {
+        const child = node as HTMLElement;
+        child.style.transform = `scale(${selectionLayoutStyle.invertScale.x}, ${selectionLayoutStyle.invertScale.y})`;
+      });
+    }
   }
 
   useEffect(() => {
