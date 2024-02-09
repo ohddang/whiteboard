@@ -43,12 +43,12 @@ export interface CanvasElement {
   translate: Site;
   rotate: number;
   scale: Site;
+  usedTool: ToolType;
 }
 
 export interface DrawElement extends CanvasElement {
   isSelect: boolean;
-  imageData: ImageData;
-  usedTool: ToolType;
+  imageData?: ImageData;
 }
 
 export interface PickingElement extends CanvasElement {

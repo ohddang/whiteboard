@@ -36,10 +36,11 @@ const Board: React.FC = () => {
   const { setTransformTool, getTransformTool } = useTransformToolStore();
 
   const onMouseDown = (e: MouseEvent) => {
+    path.splice(0, path.length);
+
     switch (getTool()) {
       case ToolType.RECT:
       case ToolType.ARROW:
-      case ToolType.TEXT:
         path.push({ x: e.pageX, y: e.pageY });
         setPath(path);
         if (pickingColorRef !== undefined) {
@@ -49,6 +50,18 @@ const Board: React.FC = () => {
           pickingColorRef.current.b = Math.floor(Math.random() * 255);
           pickingColorRef.current.a = 1;
         }
+        break;
+      case ToolType.TEXT:
+        if (pickingColorRef !== undefined) {
+          pickingColorRef.current.r = Math.floor(Math.random() * 255);
+          pickingColorRef.current.g = Math.floor(Math.random() * 255);
+          pickingColorRef.current.b = Math.floor(Math.random() * 255);
+          pickingColorRef.current.a = 1;
+        }
+
+        path.push({ x: e.pageX, y: e.pageY });
+        addDrawElements();
+        addPickingElements();
         break;
       case ToolType.SELECT:
         selectElement(e.pageX, e.pageY);
@@ -125,7 +138,6 @@ const Board: React.FC = () => {
       default:
         break;
     }
-
     setCurrentSite({ x: e.pageX, y: e.pageY });
   };
 
@@ -143,6 +155,7 @@ const Board: React.FC = () => {
       setIsDrag(false);
       transformPickingElements();
     }
+
     path.splice(0, path.length);
     setPath(path);
     setTransformTool(TransformToolType.NONE);
@@ -315,13 +328,12 @@ const Board: React.FC = () => {
     if (!ctx) {
       return undefined;
     }
-
+    const tool = getTool();
     const rect = getRect();
-    if (rect.width < 10 && rect.height < 10) return undefined;
+    if ((tool === ToolType.RECT || tool === ToolType.ARROW) && rect.width < 10 && rect.height < 10) return undefined;
 
     const newElement: DrawElement = {
       rect: rect,
-      imageData: ctx.getImageData(rect.left, rect.top, Math.max(1, rect.width), Math.max(1, rect.height)),
       pickingColor: {
         r: pickingColorRef.current.r,
         g: pickingColorRef.current.g,
@@ -335,12 +347,16 @@ const Board: React.FC = () => {
       isSelect: false,
       usedTool: tool,
     };
+    if (tool === ToolType.RECT || tool === ToolType.ARROW)
+      newElement.imageData = ctx.getImageData(rect.left, rect.top, Math.max(1, rect.width), Math.max(1, rect.height));
+
     return newElement;
   };
 
   const getPickingElement = (): PickingElement | undefined => {
     const rect = getRect();
-    if (rect.width < 10 && rect.height < 10) return undefined;
+    const tool = getTool();
+    if ((tool === ToolType.RECT || tool === ToolType.ARROW) && rect.width < 10 && rect.height < 10) return undefined;
 
     const newPickingElement: PickingElement = {
       rect: rect,
@@ -355,6 +371,7 @@ const Board: React.FC = () => {
       translate: { x: rect.left, y: rect.top },
       rotate: 0,
       scale: { x: 1, y: 1 },
+      usedTool: tool,
     };
 
     newPickingElement.pickImage.width = newPickingElement.rect.width;
@@ -424,7 +441,6 @@ const Board: React.FC = () => {
     if (pickingContext) {
       pickingContext.clearRect(0, 0, pickingContext.canvas.width, pickingContext.canvas.height);
 
-      console.log(pickingElements);
       pickingElements.forEach((element) => {
         pickingContext.save();
         pickingContext.translate(
@@ -432,20 +448,28 @@ const Board: React.FC = () => {
           element.translate.y + element.rect.height / 2
         );
         pickingContext.rotate(element.rotate * (Math.PI / 180));
-
         pickingContext.scale(element.scale.x, element.scale.y);
 
-        pickingContext.drawImage(
-          element.pickImage,
-          element.rect.left,
-          element.rect.top,
-          element.rect.width,
-          element.rect.height,
-          -(element.rect.width / 2),
-          -(element.rect.height / 2),
-          element.rect.width,
-          element.rect.height
-        );
+        if (ToolType.RECT === element.usedTool || ToolType.ARROW === element.usedTool) {
+          pickingContext.drawImage(
+            element.pickImage,
+            element.rect.left,
+            element.rect.top,
+            element.rect.width,
+            element.rect.height,
+            -(element.rect.width / 2),
+            -(element.rect.height / 2),
+            element.rect.width,
+            element.rect.height
+          );
+        } else if (ToolType.TEXT === element.usedTool) {
+          pickingContext.font = "30px Arial";
+          pickingContext.fillStyle = `rgba(${element.pickingColor.r},${element.pickingColor.g},${element.pickingColor.b},${element.pickingColor.a})`;
+          pickingContext.fillRect(0, 0, 100, 50);
+
+          // pickingContext.fillText("Hello World", 10, 50);
+          // pickingContext.measureText("Hello World");
+        }
 
         pickingContext.restore();
       });
@@ -506,7 +530,7 @@ const Board: React.FC = () => {
   useEffect(() => {
     updatePickingCanvas();
     requestAnimationFrame(updatePickingCanvas);
-  }, [isDrag, pickingElements]);
+  }, [isDrag, pickingElements, pickingElements.length]);
 
   useEffect(() => {
     setMainContext(mainCanvas.current?.getContext("2d") || ({} as CanvasRenderingContext2D));
