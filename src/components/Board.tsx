@@ -60,6 +60,7 @@ const Board: React.FC = () => {
         }
 
         path.push({ x: e.pageX, y: e.pageY });
+        path.push({ x: e.pageX + 100, y: e.pageY + 50 });
         addDrawElements();
         addPickingElements();
         break;
@@ -465,10 +466,12 @@ const Board: React.FC = () => {
         } else if (ToolType.TEXT === element.usedTool) {
           pickingContext.font = "30px Arial";
           pickingContext.fillStyle = `rgba(${element.pickingColor.r},${element.pickingColor.g},${element.pickingColor.b},${element.pickingColor.a})`;
-          pickingContext.fillRect(0, 0, 100, 50);
-
-          // pickingContext.fillText("Hello World", 10, 50);
-          // pickingContext.measureText("Hello World");
+          pickingContext.fillRect(
+            -element.rect.width / 2,
+            -element.rect.height / 2,
+            element.rect.width,
+            element.rect.height
+          );
         }
 
         pickingContext.restore();
@@ -483,17 +486,15 @@ const Board: React.FC = () => {
 
   const selectionLayoutStyle = getStyle();
   if (selectionLayoutRef.current) {
-    selectionLayoutRef.current.style.width = selectionLayoutStyle.width;
-    selectionLayoutRef.current.style.height = selectionLayoutStyle.height;
+    selectionLayoutRef.current.style.width = `${selectionLayoutStyle.width * selectionLayoutStyle.scale.x}px`;
+    selectionLayoutRef.current.style.height = `${selectionLayoutStyle.height * selectionLayoutStyle.scale.y}px`;
     selectionLayoutRef.current.style.transform = selectionLayoutStyle.transform;
-
-    const transformTool = document.getElementById("transform_tool_container");
-    if (transformTool) {
-      transformTool.childNodes.forEach((node) => {
-        const child = node as HTMLElement;
-        child.style.transform = `scale(${selectionLayoutStyle.invertScale.x}, ${selectionLayoutStyle.invertScale.y})`;
-      });
-    }
+    selectionLayoutRef.current.style.left = `${
+      (selectionLayoutStyle.width - selectionLayoutStyle.width * selectionLayoutStyle.scale.x) / 2
+    }px`;
+    selectionLayoutRef.current.style.top = `${
+      (selectionLayoutStyle.height - selectionLayoutStyle.height * selectionLayoutStyle.scale.y) / 2
+    }px`;
   }
 
   useEffect(() => {

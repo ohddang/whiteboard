@@ -6,6 +6,12 @@
   position: absolute;
 }
 
+.draw_text_element {
+  position: absolute;
+  resize: none;
+  overflow: hidden;
+}
+
 .transform_tool_container {
   position: relative;
   width: 100%;

@@ -10,13 +10,11 @@ type ToolFixActions = {
   getIsFixed: () => boolean;
 };
 
-export const useToolFixStore = create<ToolFixFlag & ToolFixActions>(
-  (set, get) => ({
-    isFixed: false,
-    setIsFixed: (flag: boolean) => set({ isFixed: flag }),
-    getIsFixed: () => get().isFixed,
-  })
-);
+export const useToolFixStore = create<ToolFixFlag & ToolFixActions>((set, get) => ({
+  isFixed: false,
+  setIsFixed: (flag: boolean) => set({ isFixed: flag }),
+  getIsFixed: () => get().isFixed,
+}));
 
 type SelectedTool = {
   tool: ToolType;
@@ -27,13 +25,11 @@ type SelectedToolActions = {
   getTool: () => ToolType;
 };
 
-export const useSelectedToolStore = create<SelectedTool & SelectedToolActions>(
-  (set, get) => ({
-    tool: ToolType.MOVE,
-    setTool: (tool: ToolType) => set({ tool: tool }),
-    getTool: () => get().tool,
-  })
-);
+export const useSelectedToolStore = create<SelectedTool & SelectedToolActions>((set, get) => ({
+  tool: ToolType.MOVE,
+  setTool: (tool: ToolType) => set({ tool: tool }),
+  getTool: () => get().tool,
+}));
 
 type TransformTool = {
   tool: TransformToolType;
@@ -44,19 +40,17 @@ type TransformToolActions = {
   getTransformTool: () => TransformToolType;
 };
 
-export const useTransformToolStore = create<
-  TransformTool & TransformToolActions
->((set, get) => ({
+export const useTransformToolStore = create<TransformTool & TransformToolActions>((set, get) => ({
   tool: TransformToolType.MOVE,
   setTransformTool: (tool: TransformToolType) => set({ tool: tool }),
   getTransformTool: () => get().tool,
 }));
 
 type SelectionLayoutStyle = {
-  width: string;
-  height: string;
+  width: number;
+  height: number;
   transform: string;
-  invertScale: Site;
+  scale: Site;
 };
 
 type SelectionLayoutStyleActions = {
@@ -64,13 +58,11 @@ type SelectionLayoutStyleActions = {
   getStyle: () => SelectionLayoutStyle;
 };
 
-export const useSelectionLayoutStyle = create<
-  SelectionLayoutStyle & SelectionLayoutStyleActions
->((set, get) => ({
-  width: "0",
-  height: "0",
+export const useSelectionLayoutStyle = create<SelectionLayoutStyle & SelectionLayoutStyleActions>((set, get) => ({
+  width: 0,
+  height: 0,
   transform: "translate(0px, 0px)",
-  invertScale: { x: 1, y: 1 },
+  scale: { x: 1, y: 1 },
   setStyle: (style: SelectionLayoutStyle) => set(style),
   getStyle: () => get(),
 }));

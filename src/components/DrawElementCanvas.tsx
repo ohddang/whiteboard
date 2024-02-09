@@ -6,7 +6,7 @@ import image from "/assets/image.svg";
 
 const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElement }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const { setStyle } = useSelectionLayoutStyle();
 
   const onChangeInput = (event: any) => {
@@ -47,10 +47,10 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
       }, 0);
 
       setStyle({
-        width: `${el.rect.width}px`,
-        height: `${el.rect.height}px`,
-        transform: `${translate} ${rotate} ${scale}`,
-        invertScale: { x: 1 / el.scale.x, y: 1 / el.scale.y },
+        width: el.rect.width,
+        height: el.rect.height,
+        transform: `${translate} ${rotate} `,
+        scale: { x: el.scale.x, y: el.scale.y },
       });
     }
   }, [
@@ -72,13 +72,12 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
         <canvas className="draw_element" ref={canvasRef}></canvas>
       )}
       {ToolType.TEXT === el.usedTool && (
-        <input
+        <textarea
           id={`${el.pickingColor.a}${el.pickingColor.g}${el.pickingColor.b}`}
-          className="draw_element"
+          className="draw_text_element"
           ref={inputRef}
           placeholder="text..."
           onChange={onChangeInput}
-          size={10}
         />
       )}
     </>
