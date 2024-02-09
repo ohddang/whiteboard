@@ -1,22 +1,77 @@
 import "./drawElement.scss";
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DrawElement, ToolType } from "../type/common";
-import { useSelectionLayoutStyle } from "../store/store";
-import image from "/assets/image.svg";
+import { useSelectionLayoutStyle, useSelectionTextScrollSize } from "../store/store";
+import { text } from "stream/consumers";
 
 const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElement }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { setStyle } = useSelectionLayoutStyle();
+  const [textScroll, setTextScroll] = useState<{ width: number; height: number }>({ width: 100, height: 50 });
 
-  const onChangeInput = (event: any) => {
-    console.log("change input ", event.target.value);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { setStyle } = useSelectionLayoutStyle();
+  const { setScrollSize } = useSelectionTextScrollSize();
+
+  const [textareaResize, setTextareaResize] = useState<boolean>(false);
+
+  const onBlurRef = useRef<boolean>(false);
+
+  const onChangeTextarea: React.ChangeEventHandler<HTMLTextAreaElement> = (event) => {
+    if (textareaRef.current === null) return;
+
+    setTextScroll({
+      width: textareaRef.current.scrollWidth,
+      height: textareaRef.current.scrollHeight,
+    });
+    setScrollSize({
+      width: textareaRef.current.scrollWidth,
+      height: textareaRef.current.scrollHeight,
+    });
   };
+
+  const onBlurTextarea: React.FocusEventHandler<HTMLTextAreaElement> = (event) => {
+    if (textareaRef.current === null) return;
+
+    // TODO : 현재 scrollArea와 width의 값을 비교하여 재조정을 할 지 말지 결정
+    textareaRef.current.style.width = `${1}px`;
+
+    setTextareaResize(!textareaResize);
+    console.log("blur", textareaRef.current.style.width, textareaRef.current.style.height);
+
+    onBlurRef.current = true;
+  };
+
+  useEffect(() => {
+    if (textareaRef.current !== null && onBlurRef.current) {
+      console.log(textareaRef.current?.style.width);
+
+      if (textScroll.width > textareaRef.current.scrollWidth) {
+        textareaRef.current.style.width = `${Number(textareaRef.current.style.width) + 2}px`;
+        setTextScroll({
+          width: textareaRef.current.scrollWidth,
+          height: textareaRef.current.scrollHeight,
+        });
+        setScrollSize({
+          width: textareaRef.current.scrollWidth,
+          height: textareaRef.current.scrollHeight,
+        });
+        onBlurRef.current = false;
+      } else {
+        textareaRef.current.style.width = `${Number(textareaRef.current.style.width) - 2}px`;
+        setTextareaResize(!textareaResize);
+      }
+
+      console.log(textareaRef.current?.style.width);
+    }
+  }, [textareaResize]);
 
   useEffect(() => {
     const translate = `translate(${el.translate.x}px, ${el.translate.y}px)`;
     const rotate = `rotate(${el.rotate}deg)`;
     const scale = `scale(${el.scale.x}, ${el.scale.y})`;
+
+    let width = 0;
+    let height = 0;
 
     if (el.usedTool === ToolType.RECT || el.usedTool === ToolType.ARROW) {
       if (canvasRef.current === null) return;
@@ -25,30 +80,36 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
       if (!ctx) return;
       if (el.imageData === undefined) return;
 
-      canvasRef.current.width = el.rect.width;
-      canvasRef.current.height = el.rect.height;
+      width = el.rect.width;
+      height = el.rect.height;
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
       canvasRef.current.style.transform = `${translate} ${rotate} ${scale}`;
 
       const img = new Image();
-      img.width = el.rect.width;
-      img.height = el.rect.height;
+      img.width = width;
+      img.height = height;
       ctx.putImageData(el.imageData, 0, 0);
     } else if (el.usedTool === ToolType.TEXT) {
-      if (inputRef.current === null) return;
-      inputRef.current.style.width = `100px`;
-      inputRef.current.style.height = `50px`;
-      inputRef.current.style.transform = `${translate} ${rotate} ${scale}`;
+      if (textareaRef.current === null) return;
+
+      width = textScroll.width;
+      height = textScroll.height;
+      textareaRef.current.style.width = `${width}px`;
+      textareaRef.current.style.height = `${height}px`;
+      textareaRef.current.style.transform = `${translate} ${rotate} ${scale}`;
+      console.log("text", textScroll.width, textScroll.height, el.rect.width, el.rect.height);
     }
 
     if (el.isSelect) {
       setTimeout(() => {
-        if (inputRef.current === null) return;
-        inputRef.current.focus();
+        if (textareaRef.current === null) return;
+        textareaRef.current.focus();
       }, 0);
 
       setStyle({
-        width: el.rect.width,
-        height: el.rect.height,
+        width: width,
+        height: height,
         transform: `${translate} ${rotate} `,
         scale: { x: el.scale.x, y: el.scale.y },
       });
@@ -64,6 +125,7 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
     el.scale.y,
     el.translate.x,
     el.translate.y,
+    textScroll,
   ]);
 
   return (
@@ -75,9 +137,10 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
         <textarea
           id={`${el.pickingColor.a}${el.pickingColor.g}${el.pickingColor.b}`}
           className="draw_text_element"
-          ref={inputRef}
+          ref={textareaRef}
           placeholder="text..."
-          onChange={onChangeInput}
+          onChange={onChangeTextarea}
+          onBlur={onBlurTextarea}
         />
       )}
     </>

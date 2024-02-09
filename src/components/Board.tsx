@@ -3,7 +3,12 @@ import "./drawElement.scss";
 import { useState, useEffect, useRef } from "react";
 import { Site, Rect, DrawElement, PickingElement, Color, ToolType, TransformToolType } from "../type/common";
 import DrawElementCanvas from "./DrawElementCanvas";
-import { useSelectedToolStore, useSelectionLayoutStyle, useTransformToolStore } from "../store/store";
+import {
+  useSelectedToolStore,
+  useSelectionLayoutStyle,
+  useSelectionTextScrollSize,
+  useTransformToolStore,
+} from "../store/store";
 
 const Board: React.FC = () => {
   const mainCanvas = useRef<HTMLCanvasElement>(null);
@@ -33,6 +38,7 @@ const Board: React.FC = () => {
 
   const { tool, setTool, getTool } = useSelectedToolStore();
   const { getStyle } = useSelectionLayoutStyle();
+  const { getScrollSize } = useSelectionTextScrollSize();
   const { setTransformTool, getTransformTool } = useTransformToolStore();
 
   const onMouseDown = (e: MouseEvent) => {
@@ -469,7 +475,7 @@ const Board: React.FC = () => {
           pickingContext.fillRect(
             -element.rect.width / 2,
             -element.rect.height / 2,
-            element.rect.width,
+            element.rect.width, // TODO : plus scroll value
             element.rect.height
           );
         }
@@ -496,6 +502,27 @@ const Board: React.FC = () => {
       (selectionLayoutStyle.height - selectionLayoutStyle.height * selectionLayoutStyle.scale.y) / 2
     }px`;
   }
+
+  // const appendTextScrollSize = getScrollSize();
+
+  // useEffect(() => {
+  //   if (selectionLayoutRef.current) {
+  //     const newPickingElements = pickingElements.map((element) => {
+  //       if (element.usedTool === ToolType.TEXT) {
+  //         if (
+  //           element.pickingColor.r === pickingColorRef.current.r &&
+  //           element.pickingColor.g === pickingColorRef.current.g &&
+  //           element.pickingColor.b === pickingColorRef.current.b
+  //         ) {
+  //           element.rect.width = appendTextScrollSize.width;
+  //           element.rect.height = appendTextScrollSize.height;
+  //         }
+  //       }
+  //       return element;
+  //     });
+  //     setPickingElements(newPickingElements);
+  //   }
+  // }, [appendTextScrollSize]);
 
   useEffect(() => {
     if (selectionLayoutRef.current) {

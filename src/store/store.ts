@@ -66,3 +66,22 @@ export const useSelectionLayoutStyle = create<SelectionLayoutStyle & SelectionLa
   setStyle: (style: SelectionLayoutStyle) => set(style),
   getStyle: () => get(),
 }));
+
+type SelectionTextScrollSize = {
+  width: number;
+  height: number;
+};
+
+type SelectionTextScrollSizeActions = {
+  setScrollSize: (size: SelectionTextScrollSize) => void;
+  getScrollSize: () => SelectionTextScrollSize;
+};
+
+export const useSelectionTextScrollSize = create<SelectionTextScrollSize & SelectionTextScrollSizeActions>(
+  (set, get) => ({
+    width: 0,
+    height: 0,
+    setScrollSize: (size: SelectionTextScrollSize) => set(size),
+    getScrollSize: () => get(),
+  })
+);
