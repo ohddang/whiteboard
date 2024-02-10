@@ -11,8 +11,6 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
   const { setStyle } = useSelectionLayoutStyle();
   const { setScrollSize } = useSelectionTextScrollSize();
 
-  const [textareaResize, setTextareaResize] = useState<boolean>(false);
-
   const onBlurRef = useRef<boolean>(false);
 
   const onChangeTextarea: React.ChangeEventHandler<HTMLTextAreaElement> = (event) => {
@@ -33,13 +31,13 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
     if (textareaRef.current === null) return;
 
     textareaRef.current.style.width = `${1}px`;
-    setTextareaResize(!textareaResize);
     onBlurRef.current = true;
   };
 
   useEffect(() => {
     if (textareaRef.current !== null && onBlurRef.current) {
       textareaRef.current.style.width = `${Number(textareaRef.current.style.width) + 2}px`;
+
       setTextScroll({
         width: textareaRef.current.scrollWidth,
         height: textareaRef.current.scrollHeight,
@@ -51,9 +49,8 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
       });
 
       onBlurRef.current = false;
-      setTextareaResize(!textareaResize);
     }
-  }, [textareaResize]);
+  }, [onBlurRef.current]);
 
   useEffect(() => {
     const translate = `translate(${el.translate.x}px, ${el.translate.y}px)`;

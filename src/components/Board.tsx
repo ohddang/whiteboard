@@ -10,6 +10,8 @@ import {
   useTransformToolStore,
 } from "../store/store";
 
+import { showLog } from "../utils/showLog";
+
 const Board: React.FC = () => {
   const mainCanvas = useRef<HTMLCanvasElement>(null);
   const pickingCanvas = useRef<HTMLCanvasElement>(null);
@@ -49,6 +51,7 @@ const Board: React.FC = () => {
     switch (getTool()) {
       case ToolType.RECT:
       case ToolType.ARROW:
+        unselectAllElement();
         path.push({ x: e.pageX, y: e.pageY });
         setPath(path);
         if (pickingColorRef !== undefined) {
@@ -60,6 +63,7 @@ const Board: React.FC = () => {
         }
         break;
       case ToolType.TEXT:
+        unselectAllElement();
         if (pickingColorRef !== undefined) {
           pickingColorRef.current.r = Math.floor(Math.random() * 255);
           pickingColorRef.current.g = Math.floor(Math.random() * 255);
@@ -73,12 +77,12 @@ const Board: React.FC = () => {
         addPickingElements();
         break;
       case ToolType.SELECT:
-        selectElement(e.pageX, e.pageY);
-        break;
       case ToolType.MOVE:
-        setIsDrag(true);
-        path.push({ x: e.pageX, y: e.pageY });
-        setPath(path);
+        if (isDrag === false) {
+          selectElement(e.pageX, e.pageY);
+          path.push({ x: e.pageX, y: e.pageY });
+          setPath(path);
+        }
         break;
       default:
         break;
@@ -102,6 +106,7 @@ const Board: React.FC = () => {
         }
         break;
       case ToolType.MOVE:
+      case ToolType.SELECT:
         break;
       default:
         break;
@@ -153,7 +158,7 @@ const Board: React.FC = () => {
   const onMouseUp = (e: MouseEvent) => {
     if (getTool() === ToolType.RECT || getTool() === ToolType.ARROW) {
       setIsDrag(false);
-      addDrawElements(); // fix : drawelement와 pickingelement가 마우스를 빠르게 움직이면 달라짐..
+      addDrawElements();
       addPickingElements();
 
       if (mainContext) {
@@ -162,8 +167,6 @@ const Board: React.FC = () => {
     }
     if (getTool() === ToolType.MOVE || getTool() === ToolType.SELECT) {
       setIsDrag(false);
-      // transformPickingElements();
-      // isTriggerRef.current = !isTriggerRef.current;
     }
 
     path.splice(0, path.length);
@@ -417,6 +420,15 @@ const Board: React.FC = () => {
     }
   };
 
+  const unselectAllElement = () => {
+    const newDrawElements = drawElements.map((element) => {
+      element.isSelect = false;
+      return element;
+    });
+    isSelectRef.current = false;
+    setDrawElements(newDrawElements);
+  };
+
   const drawElement = (context: CanvasRenderingContext2D | undefined): void => {
     context?.clearRect(0, 0, context.canvas.width, context.canvas.height);
     if (path.length <= 1) return;
@@ -477,7 +489,7 @@ const Board: React.FC = () => {
           pickingContext.fillRect(
             -element.rect.width / 2,
             -element.rect.height / 2,
-            element.rect.width, // TODO : plus scroll value
+            element.rect.width,
             element.rect.height
           );
         }
@@ -508,10 +520,6 @@ const Board: React.FC = () => {
   const appendTextScrollSize = getScrollSize();
 
   useEffect(() => {
-    isTriggerRef.current = !isTriggerRef.current;
-  }, [drawElements]);
-
-  useEffect(() => {
     if (selectionLayoutRef.current) {
       const newDrawElements = drawElements.map((element) => {
         if (element.usedTool === ToolType.TEXT) {
@@ -527,18 +535,6 @@ const Board: React.FC = () => {
         return element;
       });
       setDrawElements(newDrawElements);
-      const timeStamp = Date.now();
-      const date = new Date(timeStamp);
-      console.log(
-        `[${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
-          .getSeconds()
-          .toString()
-          .padStart(2, "0")}] ` +
-          "appendTextScrollSize " +
-          appendTextScrollSize.width +
-          " " +
-          appendTextScrollSize.height
-      );
     }
   }, [appendTextScrollSize]);
 
@@ -550,22 +546,13 @@ const Board: React.FC = () => {
 
   useEffect(() => {
     transformPickingElements();
-
-    const timeStamp = Date.now();
-    const date = new Date(timeStamp);
-
-    console.log(
-      `[${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
-        .getSeconds()
-        .toString()
-        .padStart(2, "0")}] ` + "useEffect transformPicking"
-    );
-  }, [isTriggerRef.current]);
+  }, [isTriggerRef.current, drawElements]);
 
   useEffect(() => {
     if (pickingCanvas.current) {
       pickingCanvas.current.addEventListener("mousedown", onMouseDown);
     }
+
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", onResize);
     window.addEventListener("load", onResize);
@@ -590,15 +577,6 @@ const Board: React.FC = () => {
   useEffect(() => {
     updatePickingCanvas();
     requestAnimationFrame(updatePickingCanvas); // log utils
-
-    const timeStamp = Date.now();
-    const date = new Date(timeStamp);
-    console.log(
-      `[${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
-        .getSeconds()
-        .toString()
-        .padStart(2, "0")}] ` + "updatePickingCanvas"
-    );
   }, [pickingElements, pickingElements.length]);
 
   useEffect(() => {
