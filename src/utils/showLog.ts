@@ -1,4 +1,4 @@
-export const showLog = (msg: string) => {
+export const showLog = (...msg: any) => {
   const date = new Date();
 
   const formatTimeUnit = (unit: number) => unit.toString().padStart(2, "0");
@@ -7,5 +7,7 @@ export const showLog = (msg: string) => {
   const minutes = formatTimeUnit(date.getMinutes());
   const seconds = formatTimeUnit(date.getSeconds());
 
-  console.log(`[${hours}:${minutes}:${seconds}] ${msg}`);
+  const allmsg = msg.map((m: any) => (typeof m === "string" ? m : JSON.stringify(m))).join(" ");
+
+  console.log(`[${hours}:${minutes}:${seconds}] ${allmsg}`);
 };

@@ -2,12 +2,15 @@ import "./drawElement.scss";
 import { useState, useEffect, useRef } from "react";
 import { DrawElement, ToolType } from "../type/common";
 import { useSelectionLayoutStyle, useSelectionTextScrollSize } from "../store/store";
+import { showLog } from "../utils/showLog";
+import arrow from "/assets/arrow.svg";
 
 const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElement }) => {
   const [textScroll, setTextScroll] = useState<{ width: number; height: number }>({ width: 100, height: 50 });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const arrowRef = useRef<HTMLImageElement>(null);
   const { setStyle } = useSelectionLayoutStyle();
   const { setScrollSize } = useSelectionTextScrollSize();
 
@@ -73,10 +76,26 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
       canvasRef.current.height = height;
       canvasRef.current.style.transform = `${translate} ${rotate} ${scale}`;
 
-      const img = new Image();
-      img.width = width;
-      img.height = height;
-      ctx.putImageData(el.imageData, 0, 0);
+      if (ctx) {
+        ctx.strokeStyle = "#ca5";
+        ctx.lineWidth = 8 / ((el.scale.x * el.scale.y) / (el.scale.x + el.scale.y));
+
+        ctx.fillStyle = "rgba(90, 110, 240, 0.5)";
+
+        ctx.beginPath();
+        switch (el.usedTool) {
+          case ToolType.RECT:
+            ctx.fillRect(0, 0, el.rect.width, el.rect.height);
+            ctx.rect(0, 0, el.rect.width, el.rect.height);
+            break;
+          case ToolType.ARROW:
+            ctx.moveTo(0, 0);
+            ctx.lineTo(el.rect.width, el.rect.height);
+
+            break;
+        }
+        ctx.stroke();
+      }
     } else if (el.usedTool === ToolType.TEXT) {
       if (textareaRef.current === null) return;
 
