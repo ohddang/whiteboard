@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Site, ToolType, TransformToolType } from "../type/common";
+import { Color, Site, ToolType, TransformToolType } from "../type/common";
 
 type ToolFixFlag = {
   isFixed: boolean;
@@ -70,6 +70,7 @@ export const useSelectionLayoutStyle = create<SelectionLayoutStyle & SelectionLa
 type SelectionTextScrollSize = {
   width: number;
   height: number;
+  color: Color;
 };
 
 type SelectionTextScrollSizeActions = {
@@ -81,6 +82,7 @@ export const useSelectionTextScrollSize = create<SelectionTextScrollSize & Selec
   (set, get) => ({
     width: 0,
     height: 0,
+    color: { r: 0, g: 0, b: 0, a: 0 },
     setScrollSize: (size: SelectionTextScrollSize) => set(size),
     getScrollSize: () => get(),
   })

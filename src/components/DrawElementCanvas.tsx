@@ -2,7 +2,6 @@ import "./drawElement.scss";
 import { useState, useEffect, useRef } from "react";
 import { DrawElement, ToolType } from "../type/common";
 import { useSelectionLayoutStyle, useSelectionTextScrollSize } from "../store/store";
-import { text } from "stream/consumers";
 
 const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElement }) => {
   const [textScroll, setTextScroll] = useState<{ width: number; height: number }>({ width: 100, height: 50 });
@@ -26,42 +25,33 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
     setScrollSize({
       width: textareaRef.current.scrollWidth,
       height: textareaRef.current.scrollHeight,
+      color: el.pickingColor,
     });
   };
 
   const onBlurTextarea: React.FocusEventHandler<HTMLTextAreaElement> = (event) => {
     if (textareaRef.current === null) return;
 
-    // TODO : 현재 scrollArea와 width의 값을 비교하여 재조정을 할 지 말지 결정
     textareaRef.current.style.width = `${1}px`;
-
     setTextareaResize(!textareaResize);
-    console.log("blur", textareaRef.current.style.width, textareaRef.current.style.height);
-
     onBlurRef.current = true;
   };
 
   useEffect(() => {
     if (textareaRef.current !== null && onBlurRef.current) {
-      console.log(textareaRef.current?.style.width);
+      textareaRef.current.style.width = `${Number(textareaRef.current.style.width) + 2}px`;
+      setTextScroll({
+        width: textareaRef.current.scrollWidth,
+        height: textareaRef.current.scrollHeight,
+      });
+      setScrollSize({
+        width: textareaRef.current.scrollWidth,
+        height: textareaRef.current.scrollHeight,
+        color: el.pickingColor,
+      });
 
-      if (textScroll.width > textareaRef.current.scrollWidth) {
-        textareaRef.current.style.width = `${Number(textareaRef.current.style.width) + 2}px`;
-        setTextScroll({
-          width: textareaRef.current.scrollWidth,
-          height: textareaRef.current.scrollHeight,
-        });
-        setScrollSize({
-          width: textareaRef.current.scrollWidth,
-          height: textareaRef.current.scrollHeight,
-        });
-        onBlurRef.current = false;
-      } else {
-        textareaRef.current.style.width = `${Number(textareaRef.current.style.width) - 2}px`;
-        setTextareaResize(!textareaResize);
-      }
-
-      console.log(textareaRef.current?.style.width);
+      onBlurRef.current = false;
+      setTextareaResize(!textareaResize);
     }
   }, [textareaResize]);
 
@@ -98,7 +88,6 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
       textareaRef.current.style.width = `${width}px`;
       textareaRef.current.style.height = `${height}px`;
       textareaRef.current.style.transform = `${translate} ${rotate} ${scale}`;
-      console.log("text", textScroll.width, textScroll.height, el.rect.width, el.rect.height);
     }
 
     if (el.isSelect) {

@@ -41,6 +41,8 @@ const Board: React.FC = () => {
   const { getScrollSize } = useSelectionTextScrollSize();
   const { setTransformTool, getTransformTool } = useTransformToolStore();
 
+  const isTriggerRef = useRef<boolean>(false);
+
   const onMouseDown = (e: MouseEvent) => {
     path.splice(0, path.length);
 
@@ -160,7 +162,8 @@ const Board: React.FC = () => {
     }
     if (getTool() === ToolType.MOVE || getTool() === ToolType.SELECT) {
       setIsDrag(false);
-      transformPickingElements();
+      // transformPickingElements();
+      // isTriggerRef.current = !isTriggerRef.current;
     }
 
     path.splice(0, path.length);
@@ -470,7 +473,6 @@ const Board: React.FC = () => {
             element.rect.height
           );
         } else if (ToolType.TEXT === element.usedTool) {
-          pickingContext.font = "30px Arial";
           pickingContext.fillStyle = `rgba(${element.pickingColor.r},${element.pickingColor.g},${element.pickingColor.b},${element.pickingColor.a})`;
           pickingContext.fillRect(
             -element.rect.width / 2,
@@ -503,32 +505,62 @@ const Board: React.FC = () => {
     }px`;
   }
 
-  // const appendTextScrollSize = getScrollSize();
+  const appendTextScrollSize = getScrollSize();
 
-  // useEffect(() => {
-  //   if (selectionLayoutRef.current) {
-  //     const newPickingElements = pickingElements.map((element) => {
-  //       if (element.usedTool === ToolType.TEXT) {
-  //         if (
-  //           element.pickingColor.r === pickingColorRef.current.r &&
-  //           element.pickingColor.g === pickingColorRef.current.g &&
-  //           element.pickingColor.b === pickingColorRef.current.b
-  //         ) {
-  //           element.rect.width = appendTextScrollSize.width;
-  //           element.rect.height = appendTextScrollSize.height;
-  //         }
-  //       }
-  //       return element;
-  //     });
-  //     setPickingElements(newPickingElements);
-  //   }
-  // }, [appendTextScrollSize]);
+  useEffect(() => {
+    isTriggerRef.current = !isTriggerRef.current;
+  }, [drawElements]);
+
+  useEffect(() => {
+    if (selectionLayoutRef.current) {
+      const newDrawElements = drawElements.map((element) => {
+        if (element.usedTool === ToolType.TEXT) {
+          if (
+            element.pickingColor.r === appendTextScrollSize.color.r &&
+            element.pickingColor.g === appendTextScrollSize.color.g &&
+            element.pickingColor.b === appendTextScrollSize.color.b
+          ) {
+            element.rect.width = appendTextScrollSize.width;
+            element.rect.height = appendTextScrollSize.height;
+          }
+        }
+        return element;
+      });
+      setDrawElements(newDrawElements);
+      const timeStamp = Date.now();
+      const date = new Date(timeStamp);
+      console.log(
+        `[${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
+          .getSeconds()
+          .toString()
+          .padStart(2, "0")}] ` +
+          "appendTextScrollSize " +
+          appendTextScrollSize.width +
+          " " +
+          appendTextScrollSize.height
+      );
+    }
+  }, [appendTextScrollSize]);
 
   useEffect(() => {
     if (selectionLayoutRef.current) {
       selectionLayoutRef.current.addEventListener("mousedown", onMouseDown);
     }
   }, [selectionLayoutRef.current]);
+
+  useEffect(() => {
+    transformPickingElements();
+
+    const timeStamp = Date.now();
+    const date = new Date(timeStamp);
+
+    console.log(
+      `[${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
+        .getSeconds()
+        .toString()
+        .padStart(2, "0")}] ` + "useEffect transformPicking"
+    );
+  }, [isTriggerRef.current]);
 
   useEffect(() => {
     if (pickingCanvas.current) {
@@ -557,8 +589,17 @@ const Board: React.FC = () => {
 
   useEffect(() => {
     updatePickingCanvas();
-    requestAnimationFrame(updatePickingCanvas);
-  }, [isDrag, pickingElements, pickingElements.length]);
+    requestAnimationFrame(updatePickingCanvas); // log utils
+
+    const timeStamp = Date.now();
+    const date = new Date(timeStamp);
+    console.log(
+      `[${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
+        .getSeconds()
+        .toString()
+        .padStart(2, "0")}] ` + "updatePickingCanvas"
+    );
+  }, [pickingElements, pickingElements.length]);
 
   useEffect(() => {
     setMainContext(mainCanvas.current?.getContext("2d") || ({} as CanvasRenderingContext2D));
