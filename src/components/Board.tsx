@@ -226,47 +226,70 @@ const Board: React.FC = () => {
     setDrawElements(newDrawElements);
   };
 
+  const calculateScale = (element: DrawElement, deltaX: number, deltaY: number) => {
+    if ((element.scale.x + deltaX) * element.rect.width < 40) return false;
+    if ((element.scale.y + deltaY) * element.rect.height < 40) return false;
+    return true;
+  };
+
   const scaleSelectElement = (deltaX: number, deltaY: number, tool: TransformToolType) => {
     const newDrawElements = drawElements.map((element) => {
       if (element.isSelect) {
         if (selectionLayoutRef.current) {
           const rect = selectionLayoutRef.current.getBoundingClientRect();
-          let radian;
-          let dx;
-          let dy;
-          radian = -element.rotate * (Math.PI / 180);
-          dx = deltaX * Math.cos(radian) - deltaY * Math.sin(radian);
-          dy = deltaX * Math.sin(radian) + deltaY * Math.cos(radian);
+
+          let radian = -element.rotate * (Math.PI / 180);
+          let dx = deltaX * Math.cos(radian) - deltaY * Math.sin(radian);
+          let dy = deltaX * Math.sin(radian) + deltaY * Math.cos(radian);
+          let scaledx = (dx / rect.width) * 2 * element.scale.x;
+          let scaledy = (dy / rect.height) * 2 * element.scale.y;
           switch (tool) {
             case TransformToolType.SCALE_1:
-              element.scale.x += (dx / rect.width) * 2 * element.scale.x * -1;
-              element.scale.y += (dy / rect.height) * 2 * element.scale.y * -1;
+              if (calculateScale(element, scaledx * -1, scaledy * -1)) {
+                element.scale.x += scaledx * -1;
+                element.scale.y += scaledy * -1;
+              }
               break;
             case TransformToolType.SCALE_2:
-              element.scale.y += (dy / rect.height) * 2 * element.scale.y * -1;
+              if (calculateScale(element, 0, scaledy * -1)) {
+                element.scale.y += scaledy * -1;
+              }
               break;
             case TransformToolType.SCALE_3:
-              element.scale.x += (dx / rect.width) * 2 * element.scale.x;
-              element.scale.y += (dy / rect.height) * 2 * element.scale.y * -1;
+              if (calculateScale(element, scaledx, scaledy * -1)) {
+                element.scale.x += scaledx;
+                element.scale.y += scaledy * -1;
+              }
               break;
             case TransformToolType.SCALE_4:
-              element.scale.x += (dx / rect.width) * 2 * element.scale.x * -1;
+              if (calculateScale(element, scaledx * -1, 0)) {
+                element.scale.x += scaledx * -1;
+              }
               break;
             case TransformToolType.SCALE_5:
-              element.scale.x += (dx / rect.width) * 2 * element.scale.x;
+              if (calculateScale(element, scaledx, 0)) {
+                element.scale.x += scaledx;
+              }
               break;
             case TransformToolType.SCALE_6:
-              element.scale.x += (dx / rect.width) * 2 * element.scale.x * -1;
-              element.scale.y += (dy / rect.height) * 2 * element.scale.y;
+              if (calculateScale(element, scaledx * -1, scaledy)) {
+                element.scale.x += scaledx * -1;
+                element.scale.y += scaledy;
+              }
               break;
             case TransformToolType.SCALE_7:
-              element.scale.y += (dy / rect.height) * 2 * element.scale.y;
+              if (calculateScale(element, 0, scaledy)) {
+                element.scale.y += scaledy;
+              }
               break;
             case TransformToolType.SCALE_8:
-              element.scale.x += (dx / rect.width) * 2 * element.scale.x;
-              element.scale.y += (dy / rect.height) * 2 * element.scale.y;
+              if (calculateScale(element, scaledx, scaledy)) {
+                element.scale.x += scaledx;
+                element.scale.y += scaledy;
+              }
               break;
           }
+
           // TODO : drawElementCanvas에서 canvas렌더링 방식 변경 image -> canvas에서 그리도록 변경 검토
           //        pickingElement도 redraw하도록 변경
         }
