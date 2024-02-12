@@ -21,7 +21,7 @@
 }
 
 .picking_canvas {
-  opacity: 0.5;
+  opacity: 0;
 }
 
 .draw_element {
@@ -32,11 +32,20 @@
   position: absolute;
 }
 
+.draw_text_element {
+  position: absolute;
+  resize: none;
+  overflow: hidden;
+  white-space: nowrap;
+  border: none;
+  outline: none;
+}
+
 .transform_tool_container {
   position: relative;
   width: 100%;
   height: 100%;
-  outline: 2px solid rgb(0, 0, 0);
+  outline: 1px solid rgb(0, 0, 0);
 }
 .transform_tool_container > div {
   position: absolute;
@@ -49,53 +58,45 @@
 .scale_tool_1 {
   top: calc(0% - 5px);
   left: calc(0% - 5px);
-  background-color: red;
 }
 
 .scale_tool_2 {
   top: calc(0% - 5px);
   left: calc(50% - 5px);
-  background-color: red;
 }
 
 .scale_tool_3 {
   top: calc(0% - 5px);
   left: calc(100% - 5px);
-  background-color: red;
 }
 
 .scale_tool_4 {
   top: calc(50% - 5px);
   left: calc(0% - 5px);
-  background-color: blue;
 }
 
 .scale_tool_5 {
   top: calc(50% - 5px);
   left: calc(100% - 5px);
-  background-color: blue;
 }
 
 .scale_tool_6 {
   top: calc(100% - 5px);
   left: calc(0% - 5px);
-  background-color: green;
 }
 
 .scale_tool_7 {
   top: calc(100% - 5px);
   left: calc(50% - 5px);
-  background-color: green;
 }
 
 .scale_tool_8 {
   top: calc(100% - 5px);
   left: calc(100% - 5px);
-  background-color: green;
 }
 
 .rotate_tool {
-  top: -20%;
+  top: -25px;
   left: calc(50% - 5px);
   border-radius: 50%;
 }
@@ -111,15 +112,45 @@
   justify-content: center;
 }
 
+.tool_box_container_vertical {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .tool_box {
   display: flex;
-  justify-content: center;
   flex-direction: row;
-  left: 0;
-  padding: 0;
-  width: 100%;
-  height: 40px;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px;
+  margin: 0;
+  width: auto;
+  height: 60px;
   gap: 20px;
+  border-radius: 10px;
+  transform-origin: 50% 0%;
+  background-color: rgb(240, 240, 240);
+}
+
+.tool_box_vertical {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px;
+  margin: 0;
+  width: 60px;
+  height: auto;
+  gap: 20px;
+  border-radius: 10px;
+  transform-origin: 0% 50%;
+  background-color: rgb(240, 240, 240);
 }
 
 .tool_button {
@@ -130,42 +161,23 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  outline: 1px solid rgba(0, 0, 0, 0.25);
+  border: none;
 }
 .tool_button:hover {
-  background-color: rgb(230, 230, 230);
+  background-color: rgba(50, 120, 255, 0.2);
 }
 .tool_button.select {
   background-color: rgb(50, 120, 255);
 }
-
-.tool_box_detail {
-  position: fixed;
-  top: 80px;
-  left: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  list-style: none;
-  gap: 10px;
+.tool_button.selectColor:hover {
+  border: 0.2rem dashed rgb(0, 0, 0);
 }
-.tool_box_detail > li {
+.tool_button.selectColor.select {
+  border: 0.2rem dashed rgb(0, 0, 0);
+}
+.tool_button.empty {
   background-color: rgba(0, 0, 0, 0.25);
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
-  text-align: center;
-  border-radius: 10px;
-}
-.tool_box_detail > li > button {
-  width: 100px;
-  height: 50px;
-  background: #5080f0;
-  color: white;
-  font-size: 20px;
-  border-radius: 10px;
-  border: none;
+  height: 3px;
 }
 
 html {

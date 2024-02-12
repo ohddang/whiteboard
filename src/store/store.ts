@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Color, Site, ToolType, TransformToolType } from "../type/common";
+import { Color, ColorCollection, FontType, Site, ToolType, TransformToolType } from "../type/common";
 
 type ToolFixFlag = {
   isFixed: boolean;
@@ -11,7 +11,7 @@ type ToolFixActions = {
 };
 
 export const useToolFixStore = create<ToolFixFlag & ToolFixActions>((set, get) => ({
-  isFixed: false,
+  isFixed: true,
   setIsFixed: (flag: boolean) => set({ isFixed: flag }),
   getIsFixed: () => get().isFixed,
 }));
@@ -87,3 +87,33 @@ export const useSelectionTextScrollSize = create<SelectionTextScrollSize & Selec
     getScrollSize: () => get(),
   })
 );
+
+type FontStoreType = {
+  font: FontType;
+};
+
+type FontStoreActions = {
+  setFont: (font: FontType) => void;
+  getFont: () => FontType;
+};
+
+export const useFontStoreType = create<FontStoreType & FontStoreActions>((set, get) => ({
+  font: FontType.NORMAL,
+  setFont: (font: FontType) => set({ font: font }),
+  getFont: () => get().font,
+}));
+
+type ColorStore = {
+  color: ColorCollection;
+};
+
+type ColorActions = {
+  setColor: (color: ColorCollection) => void;
+  getColor: () => ColorCollection;
+};
+
+export const useColorStore = create<ColorStore & ColorActions>((set, get) => ({
+  color: ColorCollection.RED,
+  setColor: (color: ColorCollection) => set({ color: color }),
+  getColor: () => get().color,
+}));

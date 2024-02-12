@@ -4,9 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { Site, Rect, DrawElement, PickingElement, Color, ToolType, TransformToolType } from "../type/common";
 import DrawElementCanvas from "./DrawElementCanvas";
 import {
+  useColorStore,
+  useFontStoreType,
   useSelectedToolStore,
   useSelectionLayoutStyle,
   useSelectionTextScrollSize,
+  useToolFixStore,
   useTransformToolStore,
 } from "../store/store";
 
@@ -38,10 +41,13 @@ const Board: React.FC = () => {
 
   const [currentSite, setCurrentSite] = useState<Site>({ x: 0, y: 0 });
 
+  const { getIsFixed } = useToolFixStore();
   const { tool, setTool, getTool } = useSelectedToolStore();
   const { getStyle } = useSelectionLayoutStyle();
   const { getScrollSize } = useSelectionTextScrollSize();
   const { setTransformTool, getTransformTool } = useTransformToolStore();
+  const { getColor } = useColorStore();
+  const { getFont } = useFontStoreType();
 
   const isTriggerRef = useRef<boolean>(false);
 
@@ -75,9 +81,10 @@ const Board: React.FC = () => {
         path.push({ x: e.pageX + 100, y: e.pageY + 50 });
         addDrawElements();
         addPickingElements();
+        if (false === getIsFixed()) setTool(ToolType.SELECT);
         break;
-      case ToolType.SELECT:
       case ToolType.MOVE:
+      case ToolType.SELECT:
         if (isDrag === false) {
           selectElement(e.pageX, e.pageY);
           path.push({ x: e.pageX, y: e.pageY });
@@ -89,6 +96,10 @@ const Board: React.FC = () => {
     }
     setIsDrag(true);
     setCurrentSite({ x: e.pageX, y: e.pageY });
+  };
+
+  const onDblClick = (e: MouseEvent) => {
+    if (getTool() === ToolType.SELECT) selectElement(e.pageX, e.pageY, true);
   };
 
   const onMouseMove = (e: MouseEvent) => {
@@ -160,12 +171,13 @@ const Board: React.FC = () => {
       setIsDrag(false);
       addDrawElements();
       addPickingElements();
+      if (false === getIsFixed()) setTool(ToolType.SELECT);
 
       if (mainContext) {
         mainContext.clearRect(0, 0, mainContext.canvas.width, mainContext.canvas.height);
       }
     }
-    if (getTool() === ToolType.MOVE || getTool() === ToolType.SELECT) {
+    if (getTool() === ToolType.SELECT || getTool() === ToolType.MOVE) {
       setIsDrag(false);
     }
 
@@ -289,9 +301,6 @@ const Board: React.FC = () => {
               }
               break;
           }
-
-          // TODO : drawElementCanvas에서 canvas렌더링 방식 변경 image -> canvas에서 그리도록 변경 검토
-          //        pickingElement도 redraw하도록 변경
         }
       }
       return element;
@@ -376,11 +385,17 @@ const Board: React.FC = () => {
         b: pickingColorRef.current.b,
         a: pickingColorRef.current.a,
       },
-      translate: { x: rect.left, y: rect.top }, // 수정
+      startPos: path[0],
+      endPos: path[path.length - 1],
+      colorHex: getColor(),
+      fontFamily: getFont(),
+
+      translate: { x: rect.left, y: rect.top },
       rotate: 0,
       scale: { x: 1, y: 1 },
 
       isSelect: false,
+      isEdit: false,
       usedTool: tool,
     };
     if (tool === ToolType.RECT || tool === ToolType.ARROW)
@@ -419,7 +434,7 @@ const Board: React.FC = () => {
     return newPickingElement;
   };
 
-  const selectElement = (x: number, y: number) => {
+  const selectElement = (x: number, y: number, isDblClick: boolean = false) => {
     const ctx = pickingCanvas.current?.getContext("2d");
     if (ctx) {
       const pickColor = ctx.getImageData(x, y, 1, 1).data;
@@ -435,7 +450,9 @@ const Board: React.FC = () => {
           element.pickingColor.g === pickColor[1] &&
           element.pickingColor.b === pickColor[2];
 
+        element.isEdit = isDblClick && element.isSelect;
         if (element.isSelect) isSelect = true;
+
         return element;
       });
       isSelectRef.current = isSelect;
@@ -458,8 +475,8 @@ const Board: React.FC = () => {
 
     if (context) {
       if (context === mainContext) {
-        context.strokeStyle = "#ca5";
-        context.lineWidth = 10;
+        context.strokeStyle = getColor();
+        context.lineWidth = 5;
       } else if (context === pickingDrawContext) {
         context.strokeStyle = `rgba(${pickingColorRef.current?.r}, ${pickingColorRef.current?.g}, ${pickingColorRef.current?.b}, ${pickingColorRef.current?.a})`;
         context.lineWidth = 10;
@@ -541,6 +558,8 @@ const Board: React.FC = () => {
   }
 
   const appendTextScrollSize = getScrollSize();
+  const colorHex = getColor();
+  const fontFmaily = getFont();
 
   useEffect(() => {
     if (selectionLayoutRef.current) {
@@ -563,6 +582,42 @@ const Board: React.FC = () => {
 
   useEffect(() => {
     if (selectionLayoutRef.current) {
+      const newDrawElements = drawElements.map((element) => {
+        if (element.usedTool === ToolType.TEXT) {
+          if (
+            element.pickingColor.r === pickingColorRef.current.r &&
+            element.pickingColor.g === pickingColorRef.current.g &&
+            element.pickingColor.b === pickingColorRef.current.b
+          ) {
+            element.fontFamily = fontFmaily;
+          }
+        }
+        return element;
+      });
+      setDrawElements(newDrawElements);
+    }
+  }, [fontFmaily]);
+
+  useEffect(() => {
+    if (selectionLayoutRef.current) {
+      const newDrawElements = drawElements.map((element) => {
+        if (element.usedTool === ToolType.RECT || element.usedTool === ToolType.ARROW) {
+          if (
+            element.pickingColor.r === pickingColorRef.current.r &&
+            element.pickingColor.g === pickingColorRef.current.g &&
+            element.pickingColor.b === pickingColorRef.current.b
+          ) {
+            element.colorHex = colorHex;
+          }
+        }
+        return element;
+      });
+      setDrawElements(newDrawElements);
+    }
+  }, [colorHex]);
+
+  useEffect(() => {
+    if (selectionLayoutRef.current) {
       selectionLayoutRef.current.addEventListener("mousedown", onMouseDown);
     }
   }, [selectionLayoutRef.current]);
@@ -574,14 +629,17 @@ const Board: React.FC = () => {
   useEffect(() => {
     if (pickingCanvas.current) {
       pickingCanvas.current.addEventListener("mousedown", onMouseDown);
+      window.addEventListener("dblclick", onDblClick);
     }
 
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", onResize);
     window.addEventListener("load", onResize);
     return () => {
-      if (pickingCanvas.current) pickingCanvas.current.removeEventListener("mousedown", onMouseDown);
-      if (selectionLayoutRef.current) selectionLayoutRef.current.removeEventListener("mousedown", onMouseDown);
+      if (pickingCanvas.current) {
+        pickingCanvas.current.removeEventListener("mousedown", onMouseDown);
+        window.removeEventListener("dblclick", onDblClick);
+      }
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("load", onResize);

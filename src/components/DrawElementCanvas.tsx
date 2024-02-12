@@ -3,14 +3,12 @@ import { useState, useEffect, useRef } from "react";
 import { DrawElement, ToolType } from "../type/common";
 import { useSelectionLayoutStyle, useSelectionTextScrollSize } from "../store/store";
 import { showLog } from "../utils/showLog";
-import arrow from "/assets/arrow.svg";
 
 const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElement }) => {
   const [textScroll, setTextScroll] = useState<{ width: number; height: number }>({ width: 100, height: 50 });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const arrowRef = useRef<HTMLImageElement>(null);
   const { setStyle } = useSelectionLayoutStyle();
   const { setScrollSize } = useSelectionTextScrollSize();
 
@@ -34,6 +32,7 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
     if (textareaRef.current === null) return;
 
     textareaRef.current.style.width = `${1}px`;
+    textareaRef.current.style.height = `${1}px`;
     onBlurRef.current = true;
   };
 
@@ -77,20 +76,22 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
       canvasRef.current.style.transform = `${translate} ${rotate} ${scale}`;
 
       if (ctx) {
-        ctx.strokeStyle = "#ca5";
-        ctx.lineWidth = 8 / ((el.scale.x * el.scale.y) / (el.scale.x + el.scale.y));
-
-        ctx.fillStyle = "rgba(90, 110, 240, 0.5)";
+        ctx.strokeStyle = el.colorHex;
+        ctx.fillStyle = "rgba(0, 0, 0, 0)";
 
         ctx.beginPath();
         switch (el.usedTool) {
           case ToolType.RECT:
+            ctx.lineWidth = 10 / ((el.scale.x + el.scale.y) / 2);
             ctx.fillRect(0, 0, el.rect.width, el.rect.height);
             ctx.rect(0, 0, el.rect.width, el.rect.height);
             break;
           case ToolType.ARROW:
-            ctx.moveTo(0, 0);
-            ctx.lineTo(el.rect.width, el.rect.height);
+            ctx.lineWidth = 3 / ((el.scale.x * el.scale.y) / (el.scale.x + el.scale.y));
+            if (el.startPos && el.endPos) {
+              ctx.moveTo(el.startPos.x - el.rect.left, el.startPos.y - el.rect.top);
+              ctx.lineTo(el.endPos.x - el.rect.left, el.endPos.y - el.rect.top);
+            }
 
             break;
         }
@@ -107,11 +108,7 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
     }
 
     if (el.isSelect) {
-      setTimeout(() => {
-        if (textareaRef.current === null) return;
-        textareaRef.current.focus();
-      }, 0);
-
+      if (textareaRef.current) textareaRef.current.style.fontFamily = el.fontFamily;
       setStyle({
         width: width,
         height: height,
@@ -119,8 +116,14 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
         scale: { x: el.scale.x, y: el.scale.y },
       });
     }
+    if (el.isEdit) {
+      if (textareaRef.current) textareaRef.current.focus();
+    }
   }, [
     el.isSelect,
+    el.isEdit,
+    el.colorHex,
+    el.fontFamily,
     el.rect.left,
     el.rect.top,
     el.rect.width,
@@ -146,6 +149,7 @@ const DrawElementCanvas: React.FC<{ el: DrawElement }> = ({ el }: { el: DrawElem
           placeholder="text..."
           onChange={onChangeTextarea}
           onBlur={onBlurTextarea}
+          spellCheck="false"
         />
       )}
     </>

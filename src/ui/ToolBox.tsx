@@ -1,36 +1,25 @@
 import "./toolBox.scss";
-import arrow from "/assets/arrow.svg";
+
+import { useEffect, useRef } from "react";
+
+import line from "/assets/line.svg";
 import lock from "/assets/lock.svg";
 import unlock from "/assets/unlock.svg";
-import move from "/assets/move.svg";
 import rect from "/assets/rect.svg";
 import select from "/assets/select.svg";
 import text from "/assets/text.svg";
-import image from "/assets/image.svg";
-import classNames from "classnames";
 import { useSelectedToolStore, useToolFixStore } from "../store/store";
 import { ToolType } from "../type/common";
+import ToolButton from "./ToolButton";
 
-type ToolButtonProps = {
-  select: string;
-  type: string;
-  onClick: (event: any) => void;
-};
-
-const toolList: ToolType[] = [
-  ToolType.MOVE,
-  ToolType.SELECT,
-  ToolType.RECT,
-  ToolType.ARROW,
-  ToolType.TEXT,
-  ToolType.IMAGE,
-];
-
-const toolImageList = [move, select, rect, arrow, text, image];
+const toolList: ToolType[] = [ToolType.SELECT, ToolType.RECT, ToolType.ARROW, ToolType.TEXT];
+const toolImageList = [select, rect, line, text];
 
 const ToolBox = () => {
+  const toolBoxRef = useRef<HTMLUListElement>(null);
+
   const { isFixed, setIsFixed } = useToolFixStore();
-  const { tool, setTool } = useSelectedToolStore();
+  const { getTool, setTool } = useSelectedToolStore();
 
   const onLockToggle = (event: MouseEvent) => {
     setIsFixed(!isFixed);
@@ -40,40 +29,27 @@ const ToolBox = () => {
     setTool(type);
   };
 
-  const ToolButton = ({ select, type, onClick }: ToolButtonProps) => {
-    return (
-      <li
-        key={type}
-        className={classNames("tool_button", select)}
-        onClick={onClick}
-      >
-        <img src={type} alt={type} />
-      </li>
-    );
-  };
+  useEffect(() => {
+    window.addEventListener("resize", () => {
+      if (toolBoxRef.current === null) return;
+      toolBoxRef.current.style.transform = `scale(${1.0 / window.devicePixelRatio})`;
+    });
+  }, []);
 
   return (
     <>
       <div className="tool_box_container">
-        <ul className="tool_box">
+        <ul className="tool_box" ref={toolBoxRef}>
           {isFixed ? (
-            <ToolButton
-              select="select"
-              type={lock}
-              onClick={(event) => onLockToggle(event)}
-            />
+            <ToolButton select="select" url={lock} onClick={(event) => onLockToggle(event)} />
           ) : (
-            <ToolButton
-              select=""
-              type={unlock}
-              onClick={(event) => onLockToggle(event)}
-            />
+            <ToolButton select="" url={unlock} onClick={(event) => onLockToggle(event)} />
           )}
           {toolList.map((type, index) => {
             return (
               <ToolButton
-                select={type === tool ? "select" : ""}
-                type={toolImageList[index]}
+                select={type === getTool() ? "select" : ""}
+                url={toolImageList[index]}
                 onClick={(event) => onClickTool(event, type)}
               />
             );

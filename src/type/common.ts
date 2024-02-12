@@ -4,7 +4,6 @@ export const enum ToolType {
   RECT,
   ARROW,
   TEXT,
-  IMAGE,
 }
 
 export const enum TransformToolType {
@@ -19,6 +18,20 @@ export const enum TransformToolType {
   SCALE_6,
   SCALE_7,
   SCALE_8,
+}
+
+export const enum FontType {
+  NORMAL = "Noto Sans KR",
+  PENCIL = "Nanum Pen Script",
+  CODE = "Source Code Pro",
+}
+
+export const enum ColorCollection {
+  PINK = "#f0a0a0",
+  RED = "#e03131",
+  GREEN = "#2f9e44",
+  BLUE = "#1971c2",
+  BROWN = "#f08c00",
 }
 
 export type Site = { x: number; y: number };
@@ -47,19 +60,16 @@ export interface CanvasElement {
 }
 
 export interface DrawElement extends CanvasElement {
-  isSelect: boolean;
+  startPos?: Site;
+  endPos?: Site;
   imageData?: ImageData;
+  isSelect: boolean;
+  isEdit: boolean;
+  colorHex: string;
+  fontFamily: string;
 }
 
 export interface PickingElement extends CanvasElement {
   rect: Rect;
   pickImage: HTMLImageElement;
 }
-
-export interface LineElement extends DrawElement {}
-
-export interface ShapeElement extends DrawElement {}
-
-export interface TextElement extends DrawElement {}
-
-export interface ImageElement extends DrawElement {}

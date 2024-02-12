@@ -11,13 +11,17 @@
   resize: none;
   overflow: hidden;
   white-space: nowrap;
+  border: none;
+  outline: none;
+
+  background: transparent;
 }
 
 .transform_tool_container {
   position: relative;
   width: 100%;
   height: 100%;
-  outline: 2px solid rgba(0, 0, 0, 1);
+  outline: 1px solid rgba(0, 0, 0, 1);
 
   > div {
     position: absolute;
