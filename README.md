@@ -1,6 +1,6 @@
 # <p align="center">편집가능 화이트보드</p>
 
-<p align="center"><img src="https://github.com/ohddang/whiteboard/assets/68732996/dd3f7594-07de-4baa-90a2-5a259dadaabd" width="500" /></p>
+<p align="center"><img src="https://github.com/ohddang/whiteboard/assets/68732996/b35a2c86-a852-4f3a-89ba-3002d342ad3a" width="500" /></p>
 
 
 ## 🔍 프로젝트 정보
@@ -25,9 +25,8 @@
 * useEffect에서 이벤트핸들러 등록했을때 선이 늘어날 수록 브라우저 속도가 현저히 느려지는 이슈
 * 화이트보드 영역에서 마우스를 그냥 클릭하면(mousedown event, mouseup event)가 바로 실행되어 객체가 생기는 문제가 발생  
 * transform적용 시 scale 적용문제
-* scale 적용 시 selection tool 크기가 이에 따라 커지는 문제
+* scale 적용 시 transform tool 크기가 이에 따라 크고 작아지는 문제
 * textarea focus 안되는 문제
-* 브라우저 확대 축소 시 ui 크기 변경된는 문제
 
 <br/>
 
