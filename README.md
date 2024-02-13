@@ -27,6 +27,7 @@
 * transform적용 시 scale 적용문제
 * scale 적용 시 transform tool 크기가 이에 따라 크고 작아지는 문제
 * textarea focus 안되는 문제
+* textarea resize 구현( 타이핑을 계속했을때 자동으로 늘어나고 편집으로 길이가 줄어들면 짧아진 만큼 textarea resize)
 
 <br/>
 
